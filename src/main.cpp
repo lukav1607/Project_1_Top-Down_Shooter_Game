@@ -2,8 +2,8 @@
 
 int main()
 {
-    auto window = sf::RenderWindow(sf::VideoMode({1920u, 1080u}), "CMake SFML Project");
-    window.setFramerateLimit(144);
+    auto window = sf::RenderWindow(sf::VideoMode({1920u, 1080u}), "Top Down Shooter");
+    window.setFramerateLimit(60);
 
     while (window.isOpen())
     {
@@ -12,10 +12,11 @@ int main()
             if (event->is<sf::Event::Closed>())
             {
                 window.close();
-            }
+			}
         }
 
         window.clear();
         window.display();
     }
+	return 0;
 }
