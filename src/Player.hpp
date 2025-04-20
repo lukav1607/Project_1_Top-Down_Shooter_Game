@@ -3,24 +3,38 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 
-class Player {
+#include "Bullet.hpp"
+
+class Player
+{
 public:
-	Player(const sf::RenderWindow& const window);
+	Player(const sf::RenderWindow& window);
 
 	void handleInput();
-	void update(float deltaTime, const sf::RenderWindow& const window);
-	void draw(sf::RenderWindow& window);
+	void update(float deltaTime, const sf::RenderWindow& window);
+	void draw(float alpha, sf::RenderWindow& window);
 
 private:
+	sf::Vector2f positionCurrent;
+	sf::Vector2f positionPrevious;
+
 	sf::ConvexShape shape;
-	//sf::RectangleShape shape;
+	float shapeSize;
+	float offset; // Offset from center to the tip of the player shape
+
 	sf::Vector2f velocity;
 	sf::Vector2f direction;
 	float acceleration;
 	float maxSpeed;
-	float dampingFactor;
-	sf::Angle currentAngle;
-	const float rotationSpeed = 10.0f;
+	float dampingFactor; // A factor to reduce velocity over time (simulates friction)
 
+	sf::Angle angleCurrent;
+	sf::Angle anglePrevious;
+	float rotationSpeed;
+
+	// Normalize a vector to have a magnitude of 1 (used for direction calculations)
 	sf::Vector2f normalize(const sf::Vector2f& vector);
+
+	std::vector<Bullet> bullets;
+	bool isShooting;
 };
