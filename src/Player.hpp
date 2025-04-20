@@ -12,12 +12,15 @@ public:
 	void draw(sf::RenderWindow& window);
 
 private:
-	sf::RectangleShape shape;
+	sf::ConvexShape shape;
+	//sf::RectangleShape shape;
 	sf::Vector2f velocity;
 	sf::Vector2f direction;
 	float acceleration;
 	float maxSpeed;
 	float dampingFactor;
+	sf::Angle currentAngle;
+	const float rotationSpeed = 10.0f;
 
 	sf::Vector2f normalize(const sf::Vector2f& vector);
 };
