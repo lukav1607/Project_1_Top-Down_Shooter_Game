@@ -1,7 +1,11 @@
 #include "Player.hpp"
+#include "Utility.hpp"
 
 #include <cmath>
 #include <iostream>
+
+using Utility::normalize;
+using Utility::interpolate;
 
 Player::Player(const sf::RenderWindow& window)
 {
@@ -31,18 +35,8 @@ Player::Player(const sf::RenderWindow& window)
 	rotationSpeed = 5.f;
 
 	isShooting = false;
-}
-
-sf::Vector2f Player::normalize(const sf::Vector2f& vector)
-{
-	// Calculate the length of the vector
-	float length = std::sqrt(vector.x * vector.x + vector.y * vector.y);
-
-	// Normalize the vector to a unit vector, avoid division by zero
-	if (length != 0.f)
-		return vector / length;
-	else
-		return { 0.f, 0.f };
+	timeSinceLastShot = sf::seconds(0.f);
+	fireRate = sf::seconds(0.05f);
 }
 
 void Player::handleInput()
@@ -68,8 +62,7 @@ void Player::handleInput()
 
 void Player::update(float deltaTime, const sf::RenderWindow& window)
 {
-	positionPrevious = positionCurrent;
-	anglePrevious = angleCurrent;
+	timeSinceLastShot += sf::seconds(deltaTime);
 
 	// Update direction and velocity
 	if (direction.x != 0.f || direction.y != 0.f)
@@ -89,6 +82,7 @@ void Player::update(float deltaTime, const sf::RenderWindow& window)
 	velocity *= std::pow(dampingFactor, deltaTime * 60.f); // Assuming 60 FPS
 
 	// Move shape
+	positionPrevious = positionCurrent;
 	positionCurrent += velocity * deltaTime;
 
 	// Calculate target angle to the mouse
@@ -106,14 +100,17 @@ void Player::update(float deltaTime, const sf::RenderWindow& window)
 		angleDifference -= sf::degrees(360.f);
 
 	// Change the current angle towards the target angle whilst respecting the rotation speed
+	anglePrevious = angleCurrent;
 	angleCurrent += angleDifference * rotationSpeed * deltaTime;
 
-	if (isShooting)
+	if (isShooting && timeSinceLastShot >= fireRate)
 	{
 		// Get the tip of the shape (the point facing the mouse cursor) in global coordinates
 		sf::Vector2f shapeTip = shape.getTransform().transformPoint(shape.getPoint(0));
 		// Create a new bullet and add it to the bullets vector
 		bullets.emplace_back(shapeTip, angleCurrent);
+
+		timeSinceLastShot = sf::seconds(0.f); // Reset the shot timer
 	}
 
 	for (auto& bullet : bullets)
@@ -125,18 +122,16 @@ void Player::update(float deltaTime, const sf::RenderWindow& window)
 
 void Player::draw(float alpha, sf::RenderWindow& window)
 {
-	// Interpolate between the previous and current position for smooth rendering
-	sf::Vector2f positionInterpolated = positionCurrent * alpha + positionPrevious * (1.f - alpha);
-	shape.setPosition(positionInterpolated);
-
-	// Interpolate between the previous and current angle for smooth rendering
-	sf::Angle angleInterpolated = angleCurrent * alpha + anglePrevious * (1.f - alpha);
-	shape.setRotation(angleInterpolated);
-
 	for (auto& bullet : bullets)
 		bullet.draw(alpha, window);
 
+	// Interpolate between the previous and current position for smooth rendering
+	shape.setPosition(interpolate(positionPrevious, positionCurrent, alpha));
+
+	// Interpolate between the previous and current angle for smooth rendering
+	shape.setRotation(interpolate(anglePrevious, angleCurrent, alpha));
+
 	window.draw(shape);
 
-	std::cout << bullets.size() << std::endl;
+	//std::cout << bullets.size() << std::endl;
 }

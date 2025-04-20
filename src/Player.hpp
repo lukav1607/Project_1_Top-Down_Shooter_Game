@@ -32,9 +32,8 @@ private:
 	sf::Angle anglePrevious;
 	float rotationSpeed;
 
-	// Normalize a vector to have a magnitude of 1 (used for direction calculations)
-	sf::Vector2f normalize(const sf::Vector2f& vector);
-
 	std::vector<Bullet> bullets;
 	bool isShooting;
+	sf::Time fireRate;
+	sf::Time timeSinceLastShot;
 };

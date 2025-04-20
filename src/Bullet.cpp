@@ -1,4 +1,7 @@
 #include "Bullet.hpp"
+#include "Utility.hpp"
+
+using Utility::interpolate;
 
 Bullet::Bullet(const sf::Vector2f& position, const sf::Angle& angle)
 {
@@ -21,7 +24,6 @@ void Bullet::update(float deltaTime, const sf::RenderWindow& window)
 {
 	positionPrevious = positionCurrent;
 	positionCurrent += velocity * deltaTime;
-	//shape.move(velocity * deltaTime);
 
 	// Check if the bullet is out of bounds
 	if (shape.getPosition().x < 0 || shape.getPosition().x > window.getSize().x ||
@@ -34,8 +36,7 @@ void Bullet::update(float deltaTime, const sf::RenderWindow& window)
 void Bullet::draw(float alpha, sf::RenderWindow& window)
 {
 	// Interpolate between the previous and current position for smooth rendering
-	sf::Vector2f positionInterpolated = positionCurrent * alpha + positionPrevious * (1.f - alpha);
-	shape.setPosition(positionInterpolated);
+	shape.setPosition(interpolate(positionPrevious, positionCurrent, alpha));
 
 	window.draw(shape);
 }

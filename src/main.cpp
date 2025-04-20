@@ -7,8 +7,8 @@ int main() {
     auto window = sf::RenderWindow(sf::VideoMode({ 1200u, 1200u }), "Top Down Shooter", sf::State::Windowed, settings);
     window.setVerticalSyncEnabled(true);
 
-	const float UPS = 30.f; // Updates per second
-	const float TIMESTEP = 1.f / UPS; // 30 updates per second
+	const float UPS = 50.f; // Updates per second
+	const float TIMESTEP = 1.f / UPS;
 	float accumulator = 0.f; // Time accumulator for fixed timestep
     sf::Clock clock;
 
@@ -35,7 +35,7 @@ int main() {
 			accumulator -= TIMESTEP;
             fixedUpdateCount++;
 		}
-
+        
 		float alpha = accumulator / TIMESTEP;
 
         window.clear();
