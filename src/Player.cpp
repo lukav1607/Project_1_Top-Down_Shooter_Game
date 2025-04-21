@@ -9,6 +9,8 @@ using Utility::interpolate;
 
 Player::Player(const sf::RenderWindow& window)
 {
+	wasMousePressedLastFrame = false;
+
 	shape.setPointCount(3);
 	shapeSize = 80.f;
 	offset = shapeSize / std::sqrt(3.f);
@@ -34,9 +36,19 @@ Player::Player(const sf::RenderWindow& window)
 	
 	rotationSpeed = 5.f;
 
+	fireMode = FireMode::Charge;
 	isShooting = false;
+	shotsQueued = 0;
+	fireRateAuto = sf::seconds(0.066f);
 	timeSinceLastShot = sf::seconds(0.f);
-	fireRate = sf::seconds(0.05f);
+	burstSize = 5;
+	fireRateBurst = sf::seconds(0.033f);
+	timeBetweenBursts = sf::seconds(0.5f);
+	timeSinceLastBurst = timeBetweenBursts;
+	isCharging = false;
+	chargeTime = sf::seconds(0.f);
+	chargeTimeMin = sf::seconds(0.5f);
+	chargeTimeMax = sf::seconds(2.f);
 }
 
 void Player::handleInput()
@@ -53,17 +65,44 @@ void Player::handleInput()
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) 
 		direction.x += 1.f;
 
-	// Check for shooting
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
-		isShooting = true;
-	else
-		isShooting = false;
+	bool isMousePressedNow = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
+	isShooting = false;
+
+	switch (fireMode)
+	{
+	case FireMode::SemiAuto:
+		if (isMousePressedNow && !wasMousePressedLastFrame)
+			shotsQueued++;
+		break;
+
+	case FireMode::FullAuto:
+		if (isMousePressedNow)
+			isShooting = true;
+		break;
+
+	case FireMode::Burst:
+		if (isMousePressedNow && !wasMousePressedLastFrame && shotsQueued <= 0 && timeSinceLastBurst >= timeBetweenBursts)
+			shotsQueued = burstSize;
+		break;
+
+	case FireMode::Charge:
+		if (isMousePressedNow)
+		{
+			isCharging = true;
+		}
+		else if (isCharging)
+		{
+			isCharging = false;
+			shotsQueued = 1;
+		}
+		break;
+	}
+
+	wasMousePressedLastFrame = isMousePressedNow; // Store the state of the mouse button for the next frame
 }
 
 void Player::update(float deltaTime, const sf::RenderWindow& window)
 {
-	timeSinceLastShot += sf::seconds(deltaTime);
-
 	// Update direction and velocity
 	if (direction.x != 0.f || direction.y != 0.f)
 	{
@@ -89,12 +128,12 @@ void Player::update(float deltaTime, const sf::RenderWindow& window)
 	sf::Vector2f worldMousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 	sf::Vector2f mouseDirection = worldMousePos - shape.getPosition(); // Vector from player to mouse
 	sf::Angle targetAngle = sf::radians(std::atan2(mouseDirection.y, mouseDirection.x)); // Angle of vector in radians
-	
+
 	// Calculate the difference in degrees between the target angle and the current angle
 	sf::Angle angleDifference = sf::degrees(fmodf(targetAngle.asDegrees() - angleCurrent.asDegrees() + 180.f, 360.f) - 180.f);
 
 	// Normalize the angle difference to the range [-180, 180] to avoid issues with wrapping
-	if(angleDifference < sf::degrees(-180.f))
+	if (angleDifference < sf::degrees(-180.f))
 		angleDifference += sf::degrees(360.f);
 	else if (angleDifference > sf::degrees(180.f))
 		angleDifference -= sf::degrees(360.f);
@@ -103,14 +142,57 @@ void Player::update(float deltaTime, const sf::RenderWindow& window)
 	anglePrevious = angleCurrent;
 	angleCurrent += angleDifference * rotationSpeed * deltaTime;
 
-	if (isShooting && timeSinceLastShot >= fireRate)
-	{
-		// Get the tip of the shape (the point facing the mouse cursor) in global coordinates
-		sf::Vector2f shapeTip = shape.getTransform().transformPoint(shape.getPoint(0));
-		// Create a new bullet and add it to the bullets vector
-		bullets.emplace_back(shapeTip, angleCurrent);
+	//if (!isShooting)
+	timeSinceLastShot += sf::seconds(deltaTime);
 
-		timeSinceLastShot = sf::seconds(0.f); // Reset the shot timer
+	// Firing Logic
+	switch (fireMode)
+	{
+	case FireMode::SemiAuto:
+		if (shotsQueued > 0)
+		{
+			launchBullet();
+			shotsQueued--;
+			if (shotsQueued < 0)
+				shotsQueued = 0;
+		}
+		break;
+
+	case FireMode::FullAuto:
+		if (isShooting && timeSinceLastShot >= fireRateAuto)
+			launchBullet();
+		break;
+
+	case FireMode::Burst:
+		timeSinceLastBurst += sf::seconds(deltaTime);
+		if (shotsQueued > 0)
+		{
+			if (timeSinceLastShot >= fireRateBurst)
+			{
+				launchBullet();
+				shotsQueued--;
+
+				if (shotsQueued <= 0)
+				{
+					timeSinceLastBurst = sf::seconds(0.f); // Reset the burst cooldown
+					shotsQueued = 0;
+				}
+			}
+		}
+		break;
+
+	case FireMode::Charge:
+		if (chargeTime < chargeTimeMax)
+		{
+			chargeTime += sf::seconds(deltaTime); // Track how long the player has been charging
+		}
+		if (shotsQueued == 1 && chargeTime > chargeTimeMin)
+		{
+			launchBullet();
+			chargeTime = sf::seconds(0.f); // Reset the charge time
+			shotsQueued = 0; // Reset the shots queued
+		}
+		break;
 	}
 
 	for (auto& bullet : bullets)
@@ -134,4 +216,14 @@ void Player::draw(float alpha, sf::RenderWindow& window)
 	window.draw(shape);
 
 	//std::cout << bullets.size() << std::endl;
+}
+
+void Player::launchBullet()
+{
+	// Get the tip of the shape (the point facing the mouse cursor) in global coordinates
+	sf::Vector2f shapeTip = shape.getTransform().transformPoint(shape.getPoint(0));
+	// Create a new bullet and add it to the bullets vector
+	bullets.emplace_back(shapeTip, angleCurrent);
+
+	timeSinceLastShot = sf::seconds(0.f); // Reset the shot timer
 }

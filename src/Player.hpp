@@ -14,7 +14,19 @@ public:
 	void update(float deltaTime, const sf::RenderWindow& window);
 	void draw(float alpha, sf::RenderWindow& window);
 
+	enum class FireMode
+	{
+		SemiAuto,
+		FullAuto,
+		Burst,
+		Charge
+	};
+
 private:
+	void launchBullet();
+
+	bool wasMousePressedLastFrame;
+
 	sf::Vector2f positionCurrent;
 	sf::Vector2f positionPrevious;
 
@@ -34,6 +46,19 @@ private:
 
 	std::vector<Bullet> bullets;
 	bool isShooting;
-	sf::Time fireRate;
+	FireMode fireMode;
+
+	sf::Time fireRateAuto;
 	sf::Time timeSinceLastShot;
+
+	int shotsQueued; // Used for semi-auto mode and burst mode
+	int burstSize;
+	sf::Time fireRateBurst;
+	sf::Time timeBetweenBursts;
+	sf::Time timeSinceLastBurst;
+
+	bool isCharging = false;
+	sf::Time chargeTime;
+	sf::Time chargeTimeMin;
+	sf::Time chargeTimeMax;
 };
