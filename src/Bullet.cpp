@@ -1,6 +1,8 @@
 #include "Bullet.hpp"
 #include "Utility.hpp"
 
+#include <iostream>
+
 using Utility::interpolate;
 
 Bullet::Bullet(const sf::Vector2f& position, const sf::Angle& angle, sf::Color color, float speedMultiplier, float sizeMultiplier)
@@ -23,7 +25,8 @@ Bullet::Bullet(const sf::Vector2f& position, const sf::Angle& angle, sf::Color c
 void Bullet::update(float deltaTime, const sf::RenderWindow& window)
 {
 	positionPrevious = positionCurrent;
-	positionCurrent += velocity * deltaTime;
+	positionCurrent += velocity * deltaTime; 
+	shape.setPosition(positionCurrent);
 
 	// Check if the bullet is out of bounds
 	if (shape.getPosition().x < 0 || shape.getPosition().x > window.getSize().x ||
@@ -39,4 +42,11 @@ void Bullet::render(float alpha, sf::RenderWindow& window)
 	shape.setPosition(interpolate(positionPrevious, positionCurrent, alpha));
 
 	window.draw(shape);
+
+	sf::RectangleShape debug({ shape.getGlobalBounds().size.x, shape.getGlobalBounds().size.y });
+	debug.setPosition({ shape.getGlobalBounds().position.x, shape.getGlobalBounds().position.y });
+	debug.setFillColor(sf::Color::Transparent);
+	debug.setOutlineColor(sf::Color::Magenta);
+	debug.setOutlineThickness(1.f);
+	window.draw(debug);
 }

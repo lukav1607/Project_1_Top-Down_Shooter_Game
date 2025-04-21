@@ -14,8 +14,9 @@ public:
 
 	void decreaseHealthBy(int amount);
 
-	inline const int getHealth() const { return health; }
-	inline const sf::FloatRect& getGlobalBounds() const { return shape.getGlobalBounds(); }
+	inline int getHealth() const { return health; }
+	inline sf::FloatRect getGlobalBounds() const { return shape.getGlobalBounds(); }
+	inline sf::FloatRect getLogicalBounds() const { return sf::FloatRect({ positionCurrent.x, positionCurrent.y }, { shapeSize, shapeSize }); }
 
 private:
 	sf::Vector2f positionCurrent;

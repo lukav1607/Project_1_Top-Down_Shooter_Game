@@ -118,6 +118,9 @@ void Player::handleInput()
 
 void Player::update(float deltaTime, const sf::RenderWindow& window, std::vector<Enemy>& enemies)
 {
+	// Remove off screen bullets
+	bullets.erase(std::remove_if(bullets.begin(), bullets.end(), [](const Bullet& b) { return b.getIsMarkedForDeletion(); }), bullets.end());
+
 	// Update direction and velocity
 	if (direction.x != 0.f || direction.y != 0.f)
 	{
@@ -137,7 +140,8 @@ void Player::update(float deltaTime, const sf::RenderWindow& window, std::vector
 
 	// Move shape
 	positionPrevious = positionCurrent;
-	positionCurrent += velocity * deltaTime;
+	positionCurrent += velocity * deltaTime; 
+	shape.setPosition(positionCurrent);
 
 	// Calculate target angle to the mouse
 	sf::Vector2f worldMousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
@@ -155,7 +159,8 @@ void Player::update(float deltaTime, const sf::RenderWindow& window, std::vector
 
 	// Change the current angle towards the target angle whilst respecting the rotation speed
 	anglePrevious = angleCurrent;
-	angleCurrent += angleDifference * rotationSpeed * deltaTime;
+	angleCurrent += angleDifference * rotationSpeed * deltaTime; 
+	shape.setRotation(angleCurrent);
 
 	//if (!isShooting)
 	timeSinceLastShot += sf::seconds(deltaTime);
@@ -221,22 +226,19 @@ void Player::update(float deltaTime, const sf::RenderWindow& window, std::vector
 	for (auto& bullet : bullets)
 	{
 		bullet.update(deltaTime, window);
-	}
-	for (auto& enemy : enemies)
-	{
-		for (auto& bullet : bullets)
+		if (bullet.getIsMarkedForDeletion())
+			continue;
+
+		for (auto& enemy : enemies)
 		{
-			if (enemy.getGlobalBounds().contains(bullet.getPosition()))
+			if (enemy.getGlobalBounds().findIntersection(bullet.getGlobalBounds()))
 			{
 				enemy.decreaseHealthBy(bullet.getDamage());
 				bullet.markForDeletion();
-				break;
+				//break;
 			}
 		}
 	}
-
-	// Remove off screen bullets
-	bullets.erase(std::remove_if(bullets.begin(), bullets.end(), [](const Bullet& b) { return b.getIsMarkedForDeletion(); }), bullets.end());
 }
 
 void Player::render(float alpha, sf::RenderWindow& window)

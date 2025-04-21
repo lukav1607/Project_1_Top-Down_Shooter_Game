@@ -8,7 +8,7 @@ int main() {
     auto window = sf::RenderWindow(sf::VideoMode({ 1200u, 1200u }), "Top Down Shooter", sf::State::Windowed, settings);
     window.setVerticalSyncEnabled(true);
 
-	const float UPS = 50.f; // Updates per second
+	const float UPS = 30.f; // Updates per second
 	const float TIMESTEP = 1.f / UPS;
 	float accumulator = 0.f; // Time accumulator for fixed timestep
     sf::Clock clock;
@@ -16,9 +16,9 @@ int main() {
     Player player(window);
 	std::vector<Enemy> enemies;
 
-    unsigned maxEnemies = 5;
-	sf::Time timeSinceLastSpawn = sf::seconds(0.f);
-	sf::Time spawnInterval = sf::seconds(3.f);
+    unsigned maxEnemies = 10;
+	sf::Time spawnInterval = sf::seconds(2.f);
+	sf::Time timeSinceLastSpawn = spawnInterval;
 
     while (window.isOpen())
     {
@@ -36,7 +36,7 @@ int main() {
 
 		while (accumulator >= TIMESTEP)
 		{
-			timeSinceLastSpawn += sf::seconds(frameTime);
+			timeSinceLastSpawn += sf::seconds(TIMESTEP);
 			if (timeSinceLastSpawn >= spawnInterval && enemies.size() < maxEnemies)
 			{
 				enemies.emplace_back();

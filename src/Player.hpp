@@ -15,7 +15,7 @@ public:
 	void update(float deltaTime, const sf::RenderWindow& window, std::vector<Enemy>& enemies);
 	void render(float alpha, sf::RenderWindow& window);
 
-	inline const sf::Vector2f& getPosition() const { return positionCurrent; }
+	inline sf::Vector2f getPosition() const { return positionCurrent; }
 
 	enum class FireMode
 	{

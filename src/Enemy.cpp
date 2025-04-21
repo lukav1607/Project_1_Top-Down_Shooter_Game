@@ -16,13 +16,13 @@ Enemy::Enemy() :
 	angleCurrent(sf::degrees(0.f)),
 	anglePrevious(angleCurrent),
 	rotationSpeed(4.5f),
-	healthMax(100),
+	healthMax(250),
 	health(healthMax)
 {
 	shape.setSize({ shapeSize, shapeSize });
 	shape.setFillColor(sf::Color::Red);
 	shape.setOrigin(shape.getSize() / 2.f);
-	shape.setPosition(positionCurrent);
+	shape.setPosition({ 0.f, 0.f });
 }
 
 void Enemy::update(float deltaTime, const sf::RenderWindow& window, sf::Vector2f playerPosition)
@@ -42,7 +42,8 @@ void Enemy::update(float deltaTime, const sf::RenderWindow& window, sf::Vector2f
 
 	// Change the current angle towards the target angle whilst respecting the rotation speed
 	anglePrevious = angleCurrent;
-	angleCurrent += angleDifference * rotationSpeed * deltaTime;
+	angleCurrent += angleDifference * rotationSpeed * deltaTime; 
+	shape.setRotation(angleCurrent);
 
 	// Update direction and velocity
 	if (direction.x != 0.f || direction.y != 0.f)
@@ -63,7 +64,8 @@ void Enemy::update(float deltaTime, const sf::RenderWindow& window, sf::Vector2f
 
 	// Move shape
 	positionPrevious = positionCurrent;
-	positionCurrent += velocity * deltaTime;
+	positionCurrent += velocity * deltaTime; 
+	shape.setPosition(positionCurrent);
 }
 
 void Enemy::render(float alpha, sf::RenderWindow& window)
@@ -75,6 +77,13 @@ void Enemy::render(float alpha, sf::RenderWindow& window)
 	shape.setRotation(interpolate(anglePrevious, angleCurrent, alpha));
 
 	window.draw(shape);
+
+	sf::RectangleShape debug({shape.getGlobalBounds().size.x, shape.getGlobalBounds().size.y});
+	debug.setPosition({ shape.getGlobalBounds().position.x, shape.getGlobalBounds().position.y });
+	debug.setFillColor(sf::Color::Transparent);
+	debug.setOutlineColor(sf::Color::Magenta);
+	debug.setOutlineThickness(1.f);
+	window.draw(debug);
 }
 
 void Enemy::decreaseHealthBy(int amount)
