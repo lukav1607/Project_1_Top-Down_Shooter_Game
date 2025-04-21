@@ -4,6 +4,7 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 
 #include "Bullet.hpp"
+#include "Enemy.hpp"
 
 class Player
 {
@@ -11,8 +12,10 @@ public:
 	Player(const sf::RenderWindow& window);
 
 	void handleInput();
-	void update(float deltaTime, const sf::RenderWindow& window);
-	void draw(float alpha, sf::RenderWindow& window);
+	void update(float deltaTime, const sf::RenderWindow& window, std::vector<Enemy>& enemies);
+	void render(float alpha, sf::RenderWindow& window);
+
+	inline const sf::Vector2f& getPosition() const { return positionCurrent; }
 
 	enum class FireMode
 	{
@@ -45,10 +48,14 @@ private:
 	sf::Angle anglePrevious;
 	float rotationSpeed;
 
+	unsigned healthMax;
+	int health;
+
 	float bulletSpeedMultiplier;
 	float bulletSizeMultiplier;
 
 	std::vector<Bullet> bullets;
+	sf::Color bulletColor = sf::Color::Green;
 	bool isShooting;
 	FireMode fireMode;
 
@@ -65,4 +72,8 @@ private:
 	sf::Time chargeTime;
 	sf::Time chargeTimeMin;
 	sf::Time chargeTimeMax;
+	float bulletSpeedMultMinCharge;
+	float bulletSpeedMultMaxCharge;
+	float bulletSizeMultMinCharge;
+	float bulletSizeMultMaxCharge;
 };

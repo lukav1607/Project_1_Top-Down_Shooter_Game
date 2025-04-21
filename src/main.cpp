@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include "Player.hpp"
+#include "Enemy.hpp"
 
 int main() {
     auto settings = sf::ContextSettings();
@@ -13,6 +14,11 @@ int main() {
     sf::Clock clock;
 
     Player player(window);
+	std::vector<Enemy> enemies;
+
+    unsigned maxEnemies = 5;
+	sf::Time timeSinceLastSpawn = sf::seconds(0.f);
+	sf::Time spawnInterval = sf::seconds(3.f);
 
     while (window.isOpen())
     {
@@ -30,8 +36,23 @@ int main() {
 
 		while (accumulator >= TIMESTEP)
 		{
+			timeSinceLastSpawn += sf::seconds(frameTime);
+			if (timeSinceLastSpawn >= spawnInterval && enemies.size() < maxEnemies)
+			{
+				enemies.emplace_back();
+				timeSinceLastSpawn = sf::seconds(0.f);
+			}
+
 			// Update the game state with a fixed timestep
-			player.update(TIMESTEP, window);
+
+			for (auto& enemy : enemies)
+			    enemy.update(TIMESTEP, window, player.getPosition());
+
+			player.update(TIMESTEP, window, enemies);
+
+			// Remove dead enemies
+			enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const Enemy& e) { return e.getHealth() <= 0; }), enemies.end());
+
 			accumulator -= TIMESTEP;
             fixedUpdateCount++;
 		}
@@ -39,7 +60,11 @@ int main() {
 		float alpha = accumulator / TIMESTEP;
 
         window.clear();
-        player.draw(alpha, window);
+
+        player.render(alpha, window);
+		for (auto& enemy : enemies)
+		    enemy.render(alpha, window);
+
         window.display();
     }
 	return 0;

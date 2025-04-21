@@ -13,7 +13,7 @@ Player::Player(const sf::RenderWindow& window)
 	wasMousePressedLastFrame = false;
 
 	shape.setPointCount(3);
-	shapeSize = 80.f;
+	shapeSize = 50.f;
 	offset = shapeSize / std::sqrt(3.f);
 	float height = std::sqrt(3.f) / 2.f * shapeSize;
 	shape.setPoint(0, { height / 3.f * 2.f, 0.f }); // Right point (facing mouse cursor)
@@ -37,6 +37,9 @@ Player::Player(const sf::RenderWindow& window)
 	
 	rotationSpeed = 5.f;
 
+	healthMax = 1000;
+	health = healthMax;
+
 	fireMode = FireMode::Charge;
 	bulletSpeedMultiplier = 1.f;
 	bulletSizeMultiplier = 1.f;
@@ -54,6 +57,10 @@ Player::Player(const sf::RenderWindow& window)
 	chargeTime = sf::seconds(0.f);
 	chargeTimeMin = sf::seconds(0.5f);
 	chargeTimeMax = sf::seconds(2.f);
+	bulletSpeedMultMinCharge = 0.75f;
+	bulletSpeedMultMaxCharge = 0.3f;
+	bulletSizeMultMinCharge = 1.15f;
+	bulletSizeMultMaxCharge = 5.f;
 }
 
 void Player::handleInput()
@@ -109,7 +116,7 @@ void Player::handleInput()
 	wasMousePressedLastFrame = isMousePressedNow; // Store the state of the mouse button for the next frame
 }
 
-void Player::update(float deltaTime, const sf::RenderWindow& window)
+void Player::update(float deltaTime, const sf::RenderWindow& window, std::vector<Enemy>& enemies)
 {
 	// Update direction and velocity
 	if (direction.x != 0.f || direction.y != 0.f)
@@ -134,7 +141,7 @@ void Player::update(float deltaTime, const sf::RenderWindow& window)
 
 	// Calculate target angle to the mouse
 	sf::Vector2f worldMousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-	sf::Vector2f mouseDirection = worldMousePos - shape.getPosition(); // Vector from player to mouse
+	sf::Vector2f mouseDirection = worldMousePos - positionCurrent; // Vector from player to mouse
 	sf::Angle targetAngle = sf::radians(std::atan2(mouseDirection.y, mouseDirection.x)); // Angle of vector in radians
 
 	// Calculate the difference in degrees between the target angle and the current angle
@@ -196,8 +203,14 @@ void Player::update(float deltaTime, const sf::RenderWindow& window)
 		}
 		if (shotsQueued == 1 && chargeTime > chargeTimeMin)
 		{
-			//bulletSizeMultiplier = 0.5f + std::pow(chargeTime.asSeconds(), 3);
-			//bulletSpeedMultiplier = 0.75f / (bulletSizeMultiplier / 2.f);
+			// Calculate the charge time ratio
+			float chargeTimeRatio = std::clamp(chargeTime.asSeconds() / chargeTimeMax.asSeconds(), 0.f, 1.f);
+			// Ease the charge time ratio for smoother transitions
+			chargeTimeRatio *= chargeTimeRatio;
+
+			bulletSpeedMultiplier = bulletSpeedMultMinCharge + (bulletSpeedMultMaxCharge - bulletSpeedMultMinCharge) * chargeTimeRatio;
+			bulletSizeMultiplier = bulletSizeMultMinCharge + (bulletSizeMultMaxCharge - bulletSizeMultMinCharge) * chargeTimeRatio;
+			
 			launchBullet();
 			chargeTime = sf::seconds(0.f);
 			shotsQueued = 0; // Reset the shots queued
@@ -206,16 +219,30 @@ void Player::update(float deltaTime, const sf::RenderWindow& window)
 	}
 
 	for (auto& bullet : bullets)
-		bullet.update(deltaTime, window);	
+	{
+		bullet.update(deltaTime, window);
+	}
+	for (auto& enemy : enemies)
+	{
+		for (auto& bullet : bullets)
+		{
+			if (enemy.getGlobalBounds().contains(bullet.getPosition()))
+			{
+				enemy.decreaseHealthBy(bullet.getDamage());
+				bullet.markForDeletion();
+				break;
+			}
+		}
+	}
 
 	// Remove off screen bullets
-	bullets.erase(std::remove_if(bullets.begin(), bullets.end(), [](const Bullet& b) { return b.getIsOffScreen(); }), bullets.end());
+	bullets.erase(std::remove_if(bullets.begin(), bullets.end(), [](const Bullet& b) { return b.getIsMarkedForDeletion(); }), bullets.end());
 }
 
-void Player::draw(float alpha, sf::RenderWindow& window)
+void Player::render(float alpha, sf::RenderWindow& window)
 {
 	for (auto& bullet : bullets)
-		bullet.draw(alpha, window);
+		bullet.render(alpha, window);
 
 	// Interpolate between the previous and current position for smooth rendering
 	shape.setPosition(interpolate(positionPrevious, positionCurrent, alpha));
@@ -231,7 +258,7 @@ void Player::launchBullet()
 	// Get the tip of the shape (the point facing the mouse cursor) in global coordinates
 	sf::Vector2f shapeTip = shape.getTransform().transformPoint(shape.getPoint(0));
 	// Create a new bullet and add it to the bullets vector
-	bullets.emplace_back(shapeTip, angleCurrent, bulletSpeedMultiplier, bulletSizeMultiplier);
+	bullets.emplace_back(shapeTip, angleCurrent, bulletColor, bulletSpeedMultiplier, bulletSizeMultiplier);
 
 	timeSinceLastShot = sf::seconds(0.f); // Reset the shot timer
 }

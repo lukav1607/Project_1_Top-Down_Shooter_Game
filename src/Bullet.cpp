@@ -3,10 +3,10 @@
 
 using Utility::interpolate;
 
-Bullet::Bullet(const sf::Vector2f& position, const sf::Angle& angle, float speedMultiplier, float sizeMultiplier)
+Bullet::Bullet(const sf::Vector2f& position, const sf::Angle& angle, sf::Color color, float speedMultiplier, float sizeMultiplier)
 {
 	shape.setRadius(5.f * sizeMultiplier);
-	shape.setFillColor(sf::Color::Red);
+	shape.setFillColor(color);
 	shape.setOrigin({ shape.getRadius() , shape.getRadius() });
 
 	positionCurrent = position;
@@ -17,7 +17,7 @@ Bullet::Bullet(const sf::Vector2f& position, const sf::Angle& angle, float speed
 	velocity.x = speed * std::cos(angle.asRadians());
 	velocity.y = speed * std::sin(angle.asRadians());
 
-	isOffScreen = false;
+	isMarkedForDeletion = false;
 }
 
 void Bullet::update(float deltaTime, const sf::RenderWindow& window)
@@ -29,11 +29,11 @@ void Bullet::update(float deltaTime, const sf::RenderWindow& window)
 	if (shape.getPosition().x < 0 || shape.getPosition().x > window.getSize().x ||
 		shape.getPosition().y < 0 || shape.getPosition().y > window.getSize().y)
 	{
-		isOffScreen = true;
+		isMarkedForDeletion = true;
 	}
 }
 
-void Bullet::draw(float alpha, sf::RenderWindow& window)
+void Bullet::render(float alpha, sf::RenderWindow& window)
 {
 	// Interpolate between the previous and current position for smooth rendering
 	shape.setPosition(interpolate(positionPrevious, positionCurrent, alpha));

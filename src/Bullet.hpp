@@ -5,12 +5,15 @@
 class Bullet
 {
 public: 
-	Bullet(const sf::Vector2f& position, const sf::Angle& angle, float speedMultiplier = 1.f, float sizeMultiplier = 1.f);
+	Bullet(const sf::Vector2f& position, const sf::Angle& angle, sf::Color color = sf::Color::White, float speedMultiplier = 1.f, float sizeMultiplier = 1.f);
 
 	void update(float deltaTime, const sf::RenderWindow& window);
-	void draw(float alpha, sf::RenderWindow& window);
+	void render(float alpha, sf::RenderWindow& window);
+	void markForDeletion() { isMarkedForDeletion = true; }
 
-	bool getIsOffScreen() const { return isOffScreen; }
+	inline bool getIsMarkedForDeletion() const { return isMarkedForDeletion; }
+	inline const sf::Vector2f& getPosition() const { return positionCurrent; }
+	inline const unsigned getDamage() const { return shape.getRadius() * 10.f; }
 
 private:
 	sf::Vector2f positionCurrent;
@@ -18,5 +21,5 @@ private:
 
 	sf::CircleShape shape;
 	sf::Vector2f velocity;
-	bool isOffScreen;
+	bool isMarkedForDeletion;
 };
