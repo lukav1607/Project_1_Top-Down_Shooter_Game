@@ -6,6 +6,7 @@
 
 using Utility::normalize;
 using Utility::interpolate;
+using Utility::isKeyReleased;
 
 Player::Player(const sf::RenderWindow& window)
 {
@@ -37,13 +38,17 @@ Player::Player(const sf::RenderWindow& window)
 	rotationSpeed = 5.f;
 
 	fireMode = FireMode::Charge;
+	bulletSpeedMultiplier = 1.f;
+	bulletSizeMultiplier = 1.f;
+	cycleFireModes();
+
 	isShooting = false;
 	shotsQueued = 0;
-	fireRateAuto = sf::seconds(0.066f);
+	fireRateAuto = sf::seconds(0.075f);
 	timeSinceLastShot = sf::seconds(0.f);
 	burstSize = 5;
 	fireRateBurst = sf::seconds(0.033f);
-	timeBetweenBursts = sf::seconds(0.5f);
+	timeBetweenBursts = sf::seconds(0.33f);
 	timeSinceLastBurst = timeBetweenBursts;
 	isCharging = false;
 	chargeTime = sf::seconds(0.f);
@@ -64,6 +69,9 @@ void Player::handleInput()
 		direction.x -= 1.f;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) 
 		direction.x += 1.f;
+
+	if (isKeyReleased(sf::Keyboard::Key::Space))
+		cycleFireModes();
 
 	bool isMousePressedNow = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
 	isShooting = false;
@@ -188,8 +196,10 @@ void Player::update(float deltaTime, const sf::RenderWindow& window)
 		}
 		if (shotsQueued == 1 && chargeTime > chargeTimeMin)
 		{
+			//bulletSizeMultiplier = 0.5f + std::pow(chargeTime.asSeconds(), 3);
+			//bulletSpeedMultiplier = 0.75f / (bulletSizeMultiplier / 2.f);
 			launchBullet();
-			chargeTime = sf::seconds(0.f); // Reset the charge time
+			chargeTime = sf::seconds(0.f);
 			shotsQueued = 0; // Reset the shots queued
 		}
 		break;
@@ -214,8 +224,6 @@ void Player::draw(float alpha, sf::RenderWindow& window)
 	shape.setRotation(interpolate(anglePrevious, angleCurrent, alpha));
 
 	window.draw(shape);
-
-	//std::cout << bullets.size() << std::endl;
 }
 
 void Player::launchBullet()
@@ -223,7 +231,36 @@ void Player::launchBullet()
 	// Get the tip of the shape (the point facing the mouse cursor) in global coordinates
 	sf::Vector2f shapeTip = shape.getTransform().transformPoint(shape.getPoint(0));
 	// Create a new bullet and add it to the bullets vector
-	bullets.emplace_back(shapeTip, angleCurrent);
+	bullets.emplace_back(shapeTip, angleCurrent, bulletSpeedMultiplier, bulletSizeMultiplier);
 
 	timeSinceLastShot = sf::seconds(0.f); // Reset the shot timer
+}
+
+void Player::cycleFireModes()
+{
+	// Cycle through the fire modes
+	switch (fireMode)
+	{
+	case FireMode::SemiAuto:
+		fireMode = FireMode::FullAuto;
+		bulletSpeedMultiplier = 1.15f;
+		bulletSizeMultiplier = 0.9f;
+		break;
+	case FireMode::FullAuto:
+		fireMode = FireMode::Burst;
+		bulletSpeedMultiplier = 0.9f;
+		bulletSizeMultiplier = 1.33f;
+		break;
+	case FireMode::Burst:
+		fireMode = FireMode::Charge;
+		//bulletSpeedMultiplier = 0.5f;
+		//bulletSizeMultiplier = 1.f;
+		break;
+	case FireMode::Charge:
+		fireMode = FireMode::SemiAuto;
+		bulletSpeedMultiplier = 1.1f;
+		bulletSizeMultiplier = 1.1f;
+		break;
+	}
+	std::cout << "Fire mode: " << static_cast<int>(fireMode) << std::endl;
 }

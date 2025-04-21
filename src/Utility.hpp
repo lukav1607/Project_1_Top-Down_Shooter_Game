@@ -12,4 +12,7 @@ namespace Utility
 
 	// Interpolate between two angles
 	sf::Angle interpolate(const sf::Angle& previous, const sf::Angle& current, float alpha);
+
+	// Check if a key was released this frame
+	bool isKeyReleased(const sf::Keyboard::Key& key);
 }

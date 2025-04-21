@@ -3,9 +3,9 @@
 
 using Utility::interpolate;
 
-Bullet::Bullet(const sf::Vector2f& position, const sf::Angle& angle)
+Bullet::Bullet(const sf::Vector2f& position, const sf::Angle& angle, float speedMultiplier, float sizeMultiplier)
 {
-	shape.setRadius(5.f);
+	shape.setRadius(5.f * sizeMultiplier);
 	shape.setFillColor(sf::Color::Red);
 	shape.setOrigin({ shape.getRadius() , shape.getRadius() });
 
@@ -13,7 +13,7 @@ Bullet::Bullet(const sf::Vector2f& position, const sf::Angle& angle)
 	positionPrevious = positionCurrent;
 	shape.setPosition(positionCurrent);
 
-	float speed = 1000.f;
+	float speed = 1000.f * speedMultiplier;
 	velocity.x = speed * std::cos(angle.asRadians());
 	velocity.y = speed * std::sin(angle.asRadians());
 

@@ -24,6 +24,7 @@ public:
 
 private:
 	void launchBullet();
+	void cycleFireModes();
 
 	bool wasMousePressedLastFrame;
 
@@ -43,6 +44,9 @@ private:
 	sf::Angle angleCurrent;
 	sf::Angle anglePrevious;
 	float rotationSpeed;
+
+	float bulletSpeedMultiplier;
+	float bulletSizeMultiplier;
 
 	std::vector<Bullet> bullets;
 	bool isShooting;

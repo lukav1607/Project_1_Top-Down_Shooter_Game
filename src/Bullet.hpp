@@ -5,7 +5,7 @@
 class Bullet
 {
 public: 
-	Bullet(const sf::Vector2f& position, const sf::Angle& angle);
+	Bullet(const sf::Vector2f& position, const sf::Angle& angle, float speedMultiplier = 1.f, float sizeMultiplier = 1.f);
 
 	void update(float deltaTime, const sf::RenderWindow& window);
 	void draw(float alpha, sf::RenderWindow& window);
