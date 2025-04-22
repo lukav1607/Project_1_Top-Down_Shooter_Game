@@ -13,6 +13,9 @@ namespace Utility
 	// Interpolate between two angles
 	sf::Angle interpolate(const sf::Angle& previous, const sf::Angle& current, float alpha);
 
+	bool doesCircleIntersectRectangle(sf::Vector2f circleCenter, float circleRadius, sf::FloatRect rectangle);
+	bool doesCircleIntersectCircle(sf::Vector2f circleCenter1, float circleRadius1, sf::Vector2f circleCenter2, float circleRadius2);
+
 	// Check if a key was released this frame
 	bool isKeyReleased(const sf::Keyboard::Key& key);
 

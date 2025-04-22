@@ -12,6 +12,7 @@ Bullet::Bullet(const sf::Vector2f& position, const sf::Angle& angle, sf::Color c
 	damage(10)
 {
 	shape.setRadius(5.f * sizeMultiplier);
+	collisionRadius = shape.getRadius();
 	shape.setFillColor(color);
 	shape.setOrigin({ shape.getRadius() , shape.getRadius() });
 
@@ -44,11 +45,12 @@ void Bullet::render(float alpha, sf::RenderWindow& window, bool isDebugModeOn)
 
 	if (isDebugModeOn)
 	{
-		sf::RectangleShape debug({ shape.getGlobalBounds().size.x, shape.getGlobalBounds().size.y });
-		debug.setPosition({ shape.getGlobalBounds().position.x, shape.getGlobalBounds().position.y });
+		sf::CircleShape debug(collisionRadius);
 		debug.setFillColor(sf::Color::Transparent);
 		debug.setOutlineColor(sf::Color::Magenta);
-		debug.setOutlineThickness(1.f);
+		debug.setOutlineThickness(2.f);
+		debug.setOrigin({ collisionRadius, collisionRadius });
+		debug.setPosition({ positionCurrent.x, positionCurrent.y });
 		window.draw(debug);
 	}
 }

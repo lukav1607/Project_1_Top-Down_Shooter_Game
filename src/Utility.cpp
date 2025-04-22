@@ -25,6 +25,34 @@ sf::Angle Utility::interpolate(const sf::Angle& previous, const sf::Angle& curre
 	return previous * (1.f - alpha) + current * alpha;
 }
 
+bool Utility::doesCircleIntersectRectangle(sf::Vector2f circleCenter, float circleRadius, sf::FloatRect rectangle)
+{
+	// Find the closest point to the circle within the rectangle
+	float closestX = std::clamp(circleCenter.x, rectangle.position.x, rectangle.position.x + rectangle.size.x);
+	float closestY = std::clamp(circleCenter.y, rectangle.position.y, rectangle.position.y + rectangle.size.y);
+
+	// Calculate the distance between the circle's center and this closest point
+	float dx = circleCenter.x - closestX;
+	float dy = circleCenter.y - closestY;
+
+	// If the distance is less than or equal to the circle's radius, an intersection occurs
+	return (dx * dx + dy * dy) <= (circleRadius * circleRadius);
+}
+
+bool Utility::doesCircleIntersectCircle(sf::Vector2f circleCenter1, float circleRadius1, sf::Vector2f circleCenter2, float circleRadius2)
+{
+	// Calculate the distance between the centers of the two circles
+	float dx = circleCenter1.x - circleCenter2.x;
+	float dy = circleCenter1.y - circleCenter2.y;
+	float distanceSquared = dx * dx + dy * dy;
+
+	// Calculate the sum of the radii
+	float radiusSum = circleRadius1 + circleRadius2;
+
+	// Check if the distance is less than or equal to the sum of the radii
+	return distanceSquared <= (radiusSum * radiusSum);
+}
+
 bool Utility::isKeyReleased(const sf::Keyboard::Key& key)
 {
 	static std::map<sf::Keyboard::Key, bool> keyStates;

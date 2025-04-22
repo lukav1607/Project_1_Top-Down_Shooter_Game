@@ -22,6 +22,7 @@ private:
 	void updateMovement(float deltaTime);
 	void updateRotation(float deltaTime, const sf::RenderWindow& window);
 	void updateShooting(float deltaTime, const sf::RenderWindow& window, std::vector<Enemy>& enemies);
+	void updateCollisions(float deltaTime, const sf::RenderWindow& window, std::vector<Enemy>& enemies);
 
 	sf::ConvexShape shape;
 	float shapeSize;

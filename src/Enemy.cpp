@@ -9,6 +9,7 @@ Enemy::Enemy() :
 	positionCurrent({ 0.f, 0.f }),
 	positionPrevious(positionCurrent),
 	shapeSize(40.f),
+	collisionRadius(shapeSize / 2.f),
 	velocity({ 0.f, 0.f }),
 	direction({ 0.f, 0.f }),
 	acceleration(1000.f),
@@ -17,7 +18,7 @@ Enemy::Enemy() :
 	angleCurrent(sf::degrees(0.f)),
 	anglePrevious(angleCurrent),
 	rotationSpeed(2.f),
-	healthMax(100.f),
+	healthMax(150.f),
 	health(healthMax)
 {
 	shape.setSize({ shapeSize, shapeSize });
@@ -81,11 +82,12 @@ void Enemy::render(float alpha, sf::RenderWindow& window, bool isDebugModeOn)
 
 	if (isDebugModeOn)
 	{
-		sf::RectangleShape debug({ shape.getGlobalBounds().size.x, shape.getGlobalBounds().size.y });
-		debug.setPosition({ shape.getGlobalBounds().position.x, shape.getGlobalBounds().position.y });
+		sf::CircleShape debug(collisionRadius);
 		debug.setFillColor(sf::Color::Transparent);
 		debug.setOutlineColor(sf::Color::Magenta);
-		debug.setOutlineThickness(1.f);
+		debug.setOutlineThickness(2.f);
+		debug.setOrigin({ collisionRadius, collisionRadius });
+		debug.setPosition({ positionCurrent.x, positionCurrent.y });
 		window.draw(debug);
 	}
 }

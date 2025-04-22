@@ -15,6 +15,8 @@ public:
 	void decreaseHealthBy(int amount);
 
 	inline float getHealth() const { return health; }
+	inline float getCollisionRadius() const { return collisionRadius; }
+	inline sf::Vector2f getPosition() const { return positionCurrent; }
 	inline sf::FloatRect getGlobalBounds() const { return shape.getGlobalBounds(); }
 
 private:
@@ -23,6 +25,7 @@ private:
 
 	sf::RectangleShape shape;
 	float shapeSize;
+	float collisionRadius;
 
 	sf::Vector2f velocity;
 	sf::Vector2f direction;

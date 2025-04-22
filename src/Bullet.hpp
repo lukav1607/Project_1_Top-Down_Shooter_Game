@@ -12,6 +12,8 @@ public:
 	void markForDeletion() { isMarkedForDeletion = true; }
 
 	inline bool getIsMarkedForDeletion() const { return isMarkedForDeletion; }
+	inline float getCollisionRadius() const { return collisionRadius; }
+	inline sf::Vector2f getPosition() const { return positionCurrent; }
 	inline sf::FloatRect getGlobalBounds() const { return shape.getGlobalBounds(); }
 	inline unsigned getDamage() const { return damage; }
 
@@ -20,6 +22,8 @@ private:
 	sf::Vector2f positionPrevious;
 
 	sf::CircleShape shape;
+	float collisionRadius;
+
 	sf::Vector2f velocity;
 	bool isMarkedForDeletion;
 

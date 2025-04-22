@@ -2,11 +2,9 @@
 #include "Utility.hpp"
 
 #include <cmath>
-//#include <iostream>
+#include <iostream>
 
-using Utility::normalize;
-using Utility::interpolate;
-using Utility::isKeyReleased;
+using namespace Utility;
 
 Player::Player(const sf::RenderWindow& window) :
 	// Shape
@@ -31,7 +29,7 @@ Player::Player(const sf::RenderWindow& window) :
 	// Shooting
 	isShooting(false),
 	timeSinceLastShot(sf::seconds(0.f)),
-	fireRate(sf::seconds(0.1f)),
+	fireRate(sf::seconds(0.075f)),
 	bulletSpeedMultiplier(1.f),
 	bulletSizeMultiplier(1.f)
 {
@@ -70,7 +68,8 @@ void Player::update(float deltaTime, const sf::RenderWindow& window, std::vector
 {
 	updateMovement(deltaTime);
 	updateRotation(deltaTime, window);
-	updateShooting(deltaTime, window, enemies);	
+	updateShooting(deltaTime, window, enemies);
+	updateCollisions(deltaTime, window, enemies);
 }
 
 void Player::render(float alpha, sf::RenderWindow& window, bool isDebugModeOn)
@@ -91,7 +90,7 @@ void Player::render(float alpha, sf::RenderWindow& window, bool isDebugModeOn)
 		sf::CircleShape debug(collisionRadius);
 		debug.setFillColor(sf::Color::Transparent);
 		debug.setOutlineColor(sf::Color::Magenta);
-		debug.setOutlineThickness(1.f);
+		debug.setOutlineThickness(2.f);
 		debug.setOrigin({ collisionRadius, collisionRadius });
 		debug.setPosition({ positionCurrent.x, positionCurrent.y });
 		window.draw(debug);
@@ -168,11 +167,34 @@ void Player::updateShooting(float deltaTime, const sf::RenderWindow& window, std
 		bullet.update(deltaTime, window);
 		for (auto& enemy : enemies)
 		{
-			if (enemy.getGlobalBounds().findIntersection(bullet.getGlobalBounds()))
+			if (doesCircleIntersectCircle(bullet.getPosition(), bullet.getCollisionRadius(), enemy.getPosition(), enemy.getCollisionRadius()))
+			//if (enemy.getGlobalBounds().findIntersection(bullet.getGlobalBounds()))
 			{
 				enemy.decreaseHealthBy(bullet.getDamage());
 				bullet.markForDeletion();
 			}
+		}
+	}
+}
+
+void Player::updateCollisions(float deltaTime, const sf::RenderWindow& window, std::vector<Enemy>& enemies)
+{
+	// Check for collisions with window bounds
+	if (positionCurrent.x + collisionRadius > window.getSize().x)
+		positionCurrent.x = window.getSize().x - collisionRadius;
+	else if (positionCurrent.x - collisionRadius < 0.f)
+		positionCurrent.x = collisionRadius;
+	if (positionCurrent.y + collisionRadius > window.getSize().y)
+		positionCurrent.y = window.getSize().y - collisionRadius;
+	else if (positionCurrent.y - collisionRadius < 0.f)
+		positionCurrent.y = collisionRadius;
+
+	// Check for collisions with enemies
+	for (auto& enemy : enemies)
+	{
+		if (doesCircleIntersectCircle(positionCurrent, collisionRadius, enemy.getPosition(), enemy.getCollisionRadius()))
+		{
+			std::cout << "Collision with enemy!" << std::endl;
 		}
 	}
 }
