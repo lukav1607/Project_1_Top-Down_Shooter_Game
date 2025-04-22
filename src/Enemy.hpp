@@ -10,13 +10,12 @@ public:
 	Enemy();
 
 	void update(float deltaTime, const sf::RenderWindow& window, sf::Vector2f playerPosition);
-	void render(float alpha, sf::RenderWindow& window);
+	void render(float alpha, sf::RenderWindow& window, bool isDebugModeOn);
 
 	void decreaseHealthBy(int amount);
 
 	inline int getHealth() const { return health; }
 	inline sf::FloatRect getGlobalBounds() const { return shape.getGlobalBounds(); }
-	inline sf::FloatRect getLogicalBounds() const { return sf::FloatRect({ positionCurrent.x, positionCurrent.y }, { shapeSize, shapeSize }); }
 
 private:
 	sf::Vector2f positionCurrent;

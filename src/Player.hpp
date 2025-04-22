@@ -13,31 +13,23 @@ public:
 
 	void handleInput();
 	void update(float deltaTime, const sf::RenderWindow& window, std::vector<Enemy>& enemies);
-	void render(float alpha, sf::RenderWindow& window);
+	void render(float alpha, sf::RenderWindow& window, bool isDebugModeOn);
 
 	inline sf::Vector2f getPosition() const { return positionCurrent; }
 
-	enum class FireMode
-	{
-		SemiAuto,
-		FullAuto,
-		Burst,
-		Charge
-	};
-
 private:
 	void launchBullet();
-	void cycleFireModes();
-
-	bool wasMousePressedLastFrame;
-
-	sf::Vector2f positionCurrent;
-	sf::Vector2f positionPrevious;
+	void updateMovement(float deltaTime);
+	void updateRotation(float deltaTime, const sf::RenderWindow& window);
+	void updateShooting(float deltaTime, const sf::RenderWindow& window, std::vector<Enemy>& enemies);
 
 	sf::ConvexShape shape;
 	float shapeSize;
 	float offset; // Offset from center to the tip of the player shape
+	float collisionRadius;
 
+	sf::Vector2f positionCurrent;
+	sf::Vector2f positionPrevious;
 	sf::Vector2f velocity;
 	sf::Vector2f direction;
 	float acceleration;
@@ -51,29 +43,11 @@ private:
 	unsigned healthMax;
 	int health;
 
-	float bulletSpeedMultiplier;
-	float bulletSizeMultiplier;
-
 	std::vector<Bullet> bullets;
 	sf::Color bulletColor = sf::Color::Green;
 	bool isShooting;
-	FireMode fireMode;
-
-	sf::Time fireRateAuto;
+	sf::Time fireRate;
 	sf::Time timeSinceLastShot;
-
-	int shotsQueued; // Used for semi-auto mode and burst mode
-	int burstSize;
-	sf::Time fireRateBurst;
-	sf::Time timeBetweenBursts;
-	sf::Time timeSinceLastBurst;
-
-	bool isCharging = false;
-	sf::Time chargeTime;
-	sf::Time chargeTimeMin;
-	sf::Time chargeTimeMax;
-	float bulletSpeedMultMinCharge;
-	float bulletSpeedMultMaxCharge;
-	float bulletSizeMultMinCharge;
-	float bulletSizeMultMaxCharge;
+	float bulletSpeedMultiplier;
+	float bulletSizeMultiplier;
 };

@@ -7,16 +7,16 @@ using Utility::interpolate;
 Enemy::Enemy() :
 	positionCurrent({ 0.f, 0.f }),
 	positionPrevious(positionCurrent),
-	shapeSize(35.f),
+	shapeSize(40.f),
 	velocity({ 0.f, 0.f }),
 	direction({ 0.f, 0.f }),
-	acceleration(750.f),
-	maxSpeed(250.f),
-	dampingFactor(0.9f),
+	acceleration(1000.f),
+	maxSpeed(500.f),
+	dampingFactor(0.85f),
 	angleCurrent(sf::degrees(0.f)),
 	anglePrevious(angleCurrent),
-	rotationSpeed(4.5f),
-	healthMax(250),
+	rotationSpeed(2.f),
+	healthMax(100),
 	health(healthMax)
 {
 	shape.setSize({ shapeSize, shapeSize });
@@ -68,7 +68,7 @@ void Enemy::update(float deltaTime, const sf::RenderWindow& window, sf::Vector2f
 	shape.setPosition(positionCurrent);
 }
 
-void Enemy::render(float alpha, sf::RenderWindow& window)
+void Enemy::render(float alpha, sf::RenderWindow& window, bool isDebugModeOn)
 {
 	// Interpolate between the previous and current position for smooth rendering
 	shape.setPosition(interpolate(positionPrevious, positionCurrent, alpha));
@@ -78,12 +78,15 @@ void Enemy::render(float alpha, sf::RenderWindow& window)
 
 	window.draw(shape);
 
-	sf::RectangleShape debug({shape.getGlobalBounds().size.x, shape.getGlobalBounds().size.y});
-	debug.setPosition({ shape.getGlobalBounds().position.x, shape.getGlobalBounds().position.y });
-	debug.setFillColor(sf::Color::Transparent);
-	debug.setOutlineColor(sf::Color::Magenta);
-	debug.setOutlineThickness(1.f);
-	window.draw(debug);
+	if (isDebugModeOn)
+	{
+		sf::RectangleShape debug({ shape.getGlobalBounds().size.x, shape.getGlobalBounds().size.y });
+		debug.setPosition({ shape.getGlobalBounds().position.x, shape.getGlobalBounds().position.y });
+		debug.setFillColor(sf::Color::Transparent);
+		debug.setOutlineColor(sf::Color::Magenta);
+		debug.setOutlineThickness(1.f);
+		window.draw(debug);
+	}
 }
 
 void Enemy::decreaseHealthBy(int amount)

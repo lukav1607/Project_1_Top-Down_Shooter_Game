@@ -5,28 +5,26 @@
 
 using Utility::interpolate;
 
-Bullet::Bullet(const sf::Vector2f& position, const sf::Angle& angle, sf::Color color, float speedMultiplier, float sizeMultiplier)
+Bullet::Bullet(const sf::Vector2f& position, const sf::Angle& angle, sf::Color color, float speedMultiplier, float sizeMultiplier) :
+	positionCurrent(position),
+	positionPrevious(positionCurrent),
+	isMarkedForDeletion(false)
 {
 	shape.setRadius(5.f * sizeMultiplier);
 	shape.setFillColor(color);
 	shape.setOrigin({ shape.getRadius() , shape.getRadius() });
 
-	positionCurrent = position;
-	positionPrevious = positionCurrent;
 	shape.setPosition(positionCurrent);
 
-	float speed = 1000.f * speedMultiplier;
+	float speed = 750.f * speedMultiplier;
 	velocity.x = speed * std::cos(angle.asRadians());
 	velocity.y = speed * std::sin(angle.asRadians());
-
-	isMarkedForDeletion = false;
 }
 
 void Bullet::update(float deltaTime, const sf::RenderWindow& window)
 {
 	positionPrevious = positionCurrent;
-	positionCurrent += velocity * deltaTime; 
-	shape.setPosition(positionCurrent);
+	positionCurrent += velocity * deltaTime;
 
 	// Check if the bullet is out of bounds
 	if (shape.getPosition().x < 0 || shape.getPosition().x > window.getSize().x ||
@@ -36,17 +34,20 @@ void Bullet::update(float deltaTime, const sf::RenderWindow& window)
 	}
 }
 
-void Bullet::render(float alpha, sf::RenderWindow& window)
+void Bullet::render(float alpha, sf::RenderWindow& window, bool isDebugModeOn)
 {
 	// Interpolate between the previous and current position for smooth rendering
 	shape.setPosition(interpolate(positionPrevious, positionCurrent, alpha));
 
 	window.draw(shape);
 
-	sf::RectangleShape debug({ shape.getGlobalBounds().size.x, shape.getGlobalBounds().size.y });
-	debug.setPosition({ shape.getGlobalBounds().position.x, shape.getGlobalBounds().position.y });
-	debug.setFillColor(sf::Color::Transparent);
-	debug.setOutlineColor(sf::Color::Magenta);
-	debug.setOutlineThickness(1.f);
-	window.draw(debug);
+	if (isDebugModeOn)
+	{
+		sf::RectangleShape debug({ shape.getGlobalBounds().size.x, shape.getGlobalBounds().size.y });
+		debug.setPosition({ shape.getGlobalBounds().position.x, shape.getGlobalBounds().position.y });
+		debug.setFillColor(sf::Color::Transparent);
+		debug.setOutlineColor(sf::Color::Magenta);
+		debug.setOutlineThickness(1.f);
+		window.draw(debug);
+	}
 }

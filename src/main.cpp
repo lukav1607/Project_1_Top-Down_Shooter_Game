@@ -1,12 +1,17 @@
 #include <SFML/Graphics.hpp>
 #include "Player.hpp"
 #include "Enemy.hpp"
+#include "Utility.hpp"
+
+using Utility::isKeyReleased;
 
 int main() {
     auto settings = sf::ContextSettings();
     settings.antiAliasingLevel = 8;
     auto window = sf::RenderWindow(sf::VideoMode({ 1200u, 1200u }), "Top Down Shooter", sf::State::Windowed, settings);
     window.setVerticalSyncEnabled(true);
+
+	bool isDebugModeOn = false;
 
 	const float UPS = 30.f; // Updates per second
 	const float TIMESTEP = 1.f / UPS;
@@ -32,6 +37,9 @@ int main() {
         }
         player.handleInput();
 
+		if (isKeyReleased(sf::Keyboard::Key::F3))
+			isDebugModeOn = !isDebugModeOn;
+
         int fixedUpdateCount = 0;
 
 		while (accumulator >= TIMESTEP)
@@ -42,7 +50,6 @@ int main() {
 				enemies.emplace_back();
 				timeSinceLastSpawn = sf::seconds(0.f);
 			}
-
 			// Update the game state with a fixed timestep
 
 			for (auto& enemy : enemies)
@@ -61,9 +68,9 @@ int main() {
 
         window.clear();
 
-        player.render(alpha, window);
+        player.render(alpha, window, isDebugModeOn);
 		for (auto& enemy : enemies)
-		    enemy.render(alpha, window);
+		    enemy.render(alpha, window, isDebugModeOn);
 
         window.display();
     }
