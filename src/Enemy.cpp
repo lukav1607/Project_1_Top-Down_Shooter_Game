@@ -19,7 +19,8 @@ Enemy::Enemy() :
 	anglePrevious(angleCurrent),
 	rotationSpeed(2.f),
 	healthMax(150.f),
-	health(healthMax)
+	health(healthMax),
+	flashTimer(sf::seconds(0.f))
 {
 	shape.setSize({ shapeSize, shapeSize });
 	shape.setFillColor(sf::Color::Red);
@@ -68,6 +69,16 @@ void Enemy::update(float deltaTime, const sf::RenderWindow& window, sf::Vector2f
 	positionPrevious = positionCurrent;
 	positionCurrent += velocity * deltaTime; 
 	shape.setPosition(positionCurrent);
+
+	if (flashTimer > sf::Time::Zero)
+	{
+		flashTimer -= sf::seconds(deltaTime);
+		shape.setFillColor(sf::Color::White);
+	}
+	else
+	{
+		updateColor();
+	}
 }
 
 void Enemy::render(float alpha, sf::RenderWindow& window, bool isDebugModeOn)
@@ -95,8 +106,22 @@ void Enemy::render(float alpha, sf::RenderWindow& window, bool isDebugModeOn)
 void Enemy::decreaseHealthBy(int amount)
 {
 	health -= amount;
+	flashTimer = sf::seconds(0.025f); // Flash for 0.1 seconds
+	updateColor();
+}
 
-	// Change color based on health
-	float t = 1.f - std::clamp(health / healthMax, 0.f, 1.f); // 0 = full health, 1 = no health
-	shape.setFillColor(lerp(sf::Color::Red, sf::Color::White, t));
+void Enemy::updateColor()
+{
+	float t = 1.f - std::clamp(health / healthMax, 0.f, 1.f);
+
+	float startHue = 300.f;  // deeper purple
+	float endHue = 360.f;    // red
+	float hue = startHue + t * (endHue - startHue);
+	if (hue >= 360.f) hue -= 360.f;
+
+	// Higher saturation and still bright, but not washed out
+	float saturation = 0.9f - t * 0.2f;  // from 0.9 to 0.7
+	float value = 0.7f + t * 0.25f;      // from 0.7 to 0.95
+
+	shape.setFillColor(hsvToRgb(hue, saturation, value));
 }

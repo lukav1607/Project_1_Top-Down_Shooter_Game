@@ -20,6 +20,8 @@ public:
 	inline sf::FloatRect getGlobalBounds() const { return shape.getGlobalBounds(); }
 
 private:
+	void updateColor();
+
 	sf::Vector2f positionCurrent;
 	sf::Vector2f positionPrevious;
 
@@ -39,6 +41,7 @@ private:
 
 	float healthMax;
 	float health;
+	sf::Time flashTimer;
 
 	std::vector<Bullet> bullets;
 	sf::Color bulletColor = sf::Color::Red;

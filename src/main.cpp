@@ -13,7 +13,7 @@ int main() {
 
 	bool isDebugModeOn = false;
 
-	const float UPS = 30.f; // Updates per second
+	const float UPS = 60.f; // Updates per second
 	const float TIMESTEP = 1.f / UPS;
 	float accumulator = 0.f; // Time accumulator for fixed timestep
     sf::Clock clock;

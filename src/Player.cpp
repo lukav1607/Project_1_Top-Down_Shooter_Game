@@ -29,7 +29,7 @@ Player::Player(const sf::RenderWindow& window) :
 	// Shooting
 	isShooting(false),
 	timeSinceLastShot(sf::seconds(0.f)),
-	fireRate(sf::seconds(0.075f)),
+	fireRate(sf::seconds(0.09f)),
 	bulletSpeedMultiplier(1.f),
 	bulletSizeMultiplier(1.f)
 {
@@ -41,7 +41,7 @@ Player::Player(const sf::RenderWindow& window) :
 	shape.setPoint(2, { -height / 3.f, shapeSize / 2.f });  // Bottom right point
 	shape.setOrigin((shape.getPoint(0) + shape.getPoint(1) + shape.getPoint(2)) / 3.f);
 	shape.setPosition(positionCurrent);
-	shape.setFillColor(sf::Color::Green);
+	shape.setFillColor(sf::Color(120, 255, 255));
 }
 
 void Player::handleInput()

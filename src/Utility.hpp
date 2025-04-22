@@ -21,4 +21,8 @@ namespace Utility
 
 	// Lerp between two colors
 	sf::Color lerp(const sf::Color& start, const sf::Color& end, float t);
+
+	sf::Vector3f rgbToHsv(const sf::Color& color);
+	sf::Color hsvToRgb(float h, float s, float v);
+	sf::Color hsvToRgb(const sf::Vector3f& hsv);
 }

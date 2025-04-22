@@ -45,7 +45,7 @@ private:
 	float health;
 
 	std::vector<Bullet> bullets;
-	sf::Color bulletColor = sf::Color::Green;
+	sf::Color bulletColor = sf::Color(255, 230, 100);
 	bool isShooting;
 	sf::Time fireRate;
 	sf::Time timeSinceLastShot;
