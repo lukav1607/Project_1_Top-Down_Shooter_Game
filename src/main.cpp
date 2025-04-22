@@ -48,6 +48,7 @@ int main() {
 			if (timeSinceLastSpawn >= spawnInterval && enemies.size() < maxEnemies)
 			{
 				enemies.emplace_back();
+				enemies.back().setRandomSpawnPosition(window);
 				timeSinceLastSpawn = sf::seconds(0.f);
 			}
 			// Update the game state with a fixed timestep

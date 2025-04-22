@@ -8,6 +8,7 @@ class Enemy
 {
 public:
 	Enemy();
+	void setRandomSpawnPosition(const sf::RenderWindow& window);
 
 	void update(float deltaTime, const sf::RenderWindow& window, sf::Vector2f playerPosition);
 	void render(float alpha, sf::RenderWindow& window, bool isDebugModeOn);
@@ -20,6 +21,7 @@ public:
 	inline sf::FloatRect getGlobalBounds() const { return shape.getGlobalBounds(); }
 
 private:
+	void setPosition(sf::Vector2f position);
 	void updateColor();
 
 	sf::Vector2f positionCurrent;

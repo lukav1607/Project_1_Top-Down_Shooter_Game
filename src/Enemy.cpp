@@ -1,6 +1,8 @@
 #include "Enemy.hpp"
 #include "Utility.hpp"
 
+#include <cstdlib>
+#include <ctime>
 #include <cmath>
 
 using namespace Utility;
@@ -108,6 +110,54 @@ void Enemy::decreaseHealthBy(int amount)
 	health -= amount;
 	flashTimer = sf::seconds(0.025f); // Flash for 0.1 seconds
 	updateColor();
+}
+
+void Enemy::setRandomSpawnPosition(const sf::RenderWindow& window)
+{
+	enum
+	{
+		TOP,
+		BOTTOM,
+		LEFT,
+		RIGHT
+	};
+
+	std::srand(static_cast<unsigned>(std::time(nullptr)));
+
+	int spawnSide = std::rand() % 4;
+	sf::Vector2f spawnPosition;
+
+	switch (spawnSide)
+	{
+	case TOP:
+		spawnPosition.x = rand() % window.getSize().x;  // Random X within window width
+		spawnPosition.y = -shape.getSize().y;			// Spawn just above the window
+		break;
+
+	case BOTTOM:
+		spawnPosition.x = rand() % window.getSize().x;  // Random X within window width
+		spawnPosition.y = window.getSize().y;           // Spawn just below the window
+		break;
+
+	case LEFT:
+		spawnPosition.x = -shape.getSize().x;			// Spawn just left of the window
+		spawnPosition.y = rand() % window.getSize().y;  // Random Y within window height
+		break;
+
+	case RIGHT:
+		spawnPosition.x = window.getSize().x;           // Spawn just right of the window
+		spawnPosition.y = rand() % window.getSize().y;  // Random Y within window height
+		break;
+	}
+
+	setPosition(spawnPosition);
+}
+
+void Enemy::setPosition(sf::Vector2f position)
+{
+	positionCurrent = position;
+	positionPrevious = positionCurrent;
+	shape.setPosition(positionCurrent);
 }
 
 void Enemy::updateColor()
