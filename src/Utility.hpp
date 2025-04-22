@@ -15,4 +15,7 @@ namespace Utility
 
 	// Check if a key was released this frame
 	bool isKeyReleased(const sf::Keyboard::Key& key);
+
+	// Lerp between two colors
+	sf::Color lerp(const sf::Color& start, const sf::Color& end, float t);
 }

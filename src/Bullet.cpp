@@ -8,7 +8,8 @@ using Utility::interpolate;
 Bullet::Bullet(const sf::Vector2f& position, const sf::Angle& angle, sf::Color color, float speedMultiplier, float sizeMultiplier) :
 	positionCurrent(position),
 	positionPrevious(positionCurrent),
-	isMarkedForDeletion(false)
+	isMarkedForDeletion(false),
+	damage(10)
 {
 	shape.setRadius(5.f * sizeMultiplier);
 	shape.setFillColor(color);

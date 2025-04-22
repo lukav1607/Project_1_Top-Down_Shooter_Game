@@ -1,8 +1,9 @@
 #include "Enemy.hpp"
 #include "Utility.hpp"
 
-using Utility::normalize;
-using Utility::interpolate;
+#include <cmath>
+
+using namespace Utility;
 
 Enemy::Enemy() :
 	positionCurrent({ 0.f, 0.f }),
@@ -16,7 +17,7 @@ Enemy::Enemy() :
 	angleCurrent(sf::degrees(0.f)),
 	anglePrevious(angleCurrent),
 	rotationSpeed(2.f),
-	healthMax(100),
+	healthMax(100.f),
 	health(healthMax)
 {
 	shape.setSize({ shapeSize, shapeSize });
@@ -92,4 +93,8 @@ void Enemy::render(float alpha, sf::RenderWindow& window, bool isDebugModeOn)
 void Enemy::decreaseHealthBy(int amount)
 {
 	health -= amount;
+
+	// Change color based on health
+	float t = 1.f - std::clamp(health / healthMax, 0.f, 1.f); // 0 = full health, 1 = no health
+	shape.setFillColor(lerp(sf::Color::Red, sf::Color::White, t));
 }

@@ -1,5 +1,6 @@
 #include "Utility.hpp"
 
+#include <SFML/System.hpp>
 #include <map>
 
 sf::Vector2f Utility::normalize(const sf::Vector2f& vector)
@@ -33,4 +34,15 @@ bool Utility::isKeyReleased(const sf::Keyboard::Key& key)
 	bool wasPressedLastFrame = keyStates[key];
 	keyStates[key] = isPressedNow;
 	return !isPressedNow && wasPressedLastFrame;
+}
+
+sf::Color Utility::lerp(const sf::Color& start, const sf::Color& end, float t)
+{
+	return sf::Color
+	(
+		static_cast<std::uint8_t>(start.r + (end.r - start.r) * t),
+		static_cast<std::uint8_t>(start.g + (end.g - start.g) * t),
+		static_cast<std::uint8_t>(start.b + (end.b - start.b) * t),
+		static_cast<std::uint8_t>(start.a + (end.a - start.a) * t)
+	);
 }

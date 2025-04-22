@@ -40,8 +40,8 @@ private:
 	sf::Angle anglePrevious;
 	float rotationSpeed;
 
-	unsigned healthMax;
-	int health;
+	float healthMax;
+	float health;
 
 	std::vector<Bullet> bullets;
 	sf::Color bulletColor = sf::Color::Green;

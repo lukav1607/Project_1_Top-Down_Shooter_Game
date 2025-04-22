@@ -26,7 +26,7 @@ Player::Player(const sf::RenderWindow& window) :
 	anglePrevious(angleCurrent),
 	rotationSpeed(5.f),
 	// Health
-	healthMax(1000),
+	healthMax(100.f),
 	health(healthMax),
 	// Shooting
 	isShooting(false),
@@ -95,12 +95,6 @@ void Player::render(float alpha, sf::RenderWindow& window, bool isDebugModeOn)
 		debug.setOrigin({ collisionRadius, collisionRadius });
 		debug.setPosition({ positionCurrent.x, positionCurrent.y });
 		window.draw(debug);
-		/*sf::RectangleShape debug({ shape.getGlobalBounds().size.x, shape.getGlobalBounds().size.y });
-		debug.setPosition({ shape.getGlobalBounds().position.x, shape.getGlobalBounds().position.y });
-		debug.setFillColor(sf::Color::Transparent);
-		debug.setOutlineColor(sf::Color::Magenta);
-		debug.setOutlineThickness(1.f);
-		window.draw(debug);*/
 	}
 }
 

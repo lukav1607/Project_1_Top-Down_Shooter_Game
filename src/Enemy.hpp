@@ -14,7 +14,7 @@ public:
 
 	void decreaseHealthBy(int amount);
 
-	inline int getHealth() const { return health; }
+	inline float getHealth() const { return health; }
 	inline sf::FloatRect getGlobalBounds() const { return shape.getGlobalBounds(); }
 
 private:
@@ -34,8 +34,8 @@ private:
 	sf::Angle anglePrevious;
 	float rotationSpeed;
 
-	unsigned healthMax;
-	int health;
+	float healthMax;
+	float health;
 
 	std::vector<Bullet> bullets;
 	sf::Color bulletColor = sf::Color::Red;
