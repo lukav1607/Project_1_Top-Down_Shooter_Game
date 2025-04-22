@@ -29,9 +29,9 @@ Player::Player(const sf::RenderWindow& window) :
 	// Shooting
 	isShooting(false),
 	timeSinceLastShot(sf::seconds(0.f)),
-	fireRate(sf::seconds(0.09f)),
+	fireRate(sf::seconds(0.08f)),
 	bulletSpeedMultiplier(1.f),
-	bulletSizeMultiplier(1.f)
+	bulletSizeMultiplier(1.1f)
 {
 	// Initialize the shape
 	shape.setPointCount(3);
@@ -172,6 +172,7 @@ void Player::updateShooting(float deltaTime, const sf::RenderWindow& window, std
 			{
 				enemy.decreaseHealthBy(bullet.getDamage());
 				bullet.markForDeletion();
+				break; // Exit the loop after a hit to avoid multiple hits with the same bullet
 			}
 		}
 	}

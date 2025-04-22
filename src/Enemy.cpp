@@ -20,7 +20,7 @@ Enemy::Enemy() :
 	angleCurrent(sf::degrees(0.f)),
 	anglePrevious(angleCurrent),
 	rotationSpeed(2.f),
-	healthMax(150.f),
+	healthMax(100.f),
 	health(healthMax),
 	flashTimer(sf::seconds(0.f))
 {
@@ -121,8 +121,6 @@ void Enemy::setRandomSpawnPosition(const sf::RenderWindow& window)
 		LEFT,
 		RIGHT
 	};
-
-	std::srand(static_cast<unsigned>(std::time(nullptr)));
 
 	int spawnSide = std::rand() % 4;
 	sf::Vector2f spawnPosition;

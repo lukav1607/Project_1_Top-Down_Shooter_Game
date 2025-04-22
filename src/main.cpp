@@ -21,9 +21,11 @@ int main() {
     Player player(window);
 	std::vector<Enemy> enemies;
 
-    unsigned maxEnemies = 10;
-	sf::Time spawnInterval = sf::seconds(2.f);
+    unsigned maxEnemies = 50;
+	sf::Time spawnInterval = sf::seconds(0.5f);
 	sf::Time timeSinceLastSpawn = spawnInterval;
+
+	std::srand(static_cast<unsigned>(std::time(nullptr)));
 
     while (window.isOpen())
     {
