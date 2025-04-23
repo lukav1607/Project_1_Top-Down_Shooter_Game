@@ -8,9 +8,10 @@
 using namespace Utility;
 
 Enemy::Enemy() :
+	isFirstUpdate(true),
 	positionCurrent({ 0.f, 0.f }),
 	positionPrevious(positionCurrent),
-	shapeSize(40.f),
+	shapeSize(60.f),
 	collisionRadius(shapeSize / 2.f),
 	velocity({ 0.f, 0.f }),
 	direction({ 0.f, 0.f }),
@@ -32,23 +33,14 @@ Enemy::Enemy() :
 
 void Enemy::update(float deltaTime, const sf::RenderWindow& window, sf::Vector2f playerPosition)
 {
-	// Calculate target angle to the player
-	direction = playerPosition - positionCurrent; // Vector from enemy to player
-	sf::Angle targetAngle = sf::radians(std::atan2(direction.y, direction.x)); // Angle of vector in radians
+	if (isFirstUpdate)
+	{
+		setRandomSpawnPosition(window);
+		setRotation(playerPosition);
+		isFirstUpdate = false;
+	}
 
-	// Calculate the difference in degrees between the target angle and the current angle
-	sf::Angle angleDifference = sf::degrees(fmodf(targetAngle.asDegrees() - angleCurrent.asDegrees() + 180.f, 360.f) - 180.f);
-
-	// Normalize the angle difference to the range [-180, 180] to avoid issues with wrapping
-	if (angleDifference < sf::degrees(-180.f))
-		angleDifference += sf::degrees(360.f);
-	else if (angleDifference > sf::degrees(180.f))
-	angleDifference -= sf::degrees(360.f);
-
-	// Change the current angle towards the target angle whilst respecting the rotation speed
-	anglePrevious = angleCurrent;
-	angleCurrent += angleDifference * rotationSpeed * deltaTime; 
-	shape.setRotation(angleCurrent);
+	updateRotation(deltaTime, playerPosition);
 
 	// Update direction and velocity
 	if (direction.x != 0.f || direction.y != 0.f)
@@ -149,6 +141,39 @@ void Enemy::setRandomSpawnPosition(const sf::RenderWindow& window)
 	}
 
 	setPosition(spawnPosition);
+}
+
+void Enemy::setRotation(const sf::Vector2f& playerPosition)
+{
+	// Calculate target angle to the player
+	direction = playerPosition - positionCurrent; // Vector from enemy to player
+	sf::Angle targetAngle = sf::radians(std::atan2(direction.y, direction.x)); // Angle of vector in radians
+
+	// Instantly set the current angle to the target angle
+	angleCurrent = targetAngle;
+	anglePrevious = angleCurrent;
+	shape.setRotation(angleCurrent);
+}
+
+void Enemy::updateRotation(float deltaTime, const sf::Vector2f& playerPosition)
+{
+	// Calculate target angle to the player
+	direction = playerPosition - positionCurrent; // Vector from enemy to player
+	sf::Angle targetAngle = sf::radians(std::atan2(direction.y, direction.x)); // Angle of vector in radians
+
+	// Calculate the difference in degrees between the target angle and the current angle
+	sf::Angle angleDifference = sf::degrees(fmodf(targetAngle.asDegrees() - angleCurrent.asDegrees() + 180.f, 360.f) - 180.f);
+
+	// Normalize the angle difference to the range [-180, 180] to avoid issues with wrapping
+	if (angleDifference < sf::degrees(-180.f))
+		angleDifference += sf::degrees(360.f);
+	else if (angleDifference > sf::degrees(180.f))
+		angleDifference -= sf::degrees(360.f);
+
+	// Change the current angle towards the target angle whilst respecting the rotation speed
+	anglePrevious = angleCurrent;
+	angleCurrent += angleDifference * rotationSpeed * deltaTime;
+	shape.setRotation(angleCurrent);
 }
 
 void Enemy::setPosition(sf::Vector2f position)

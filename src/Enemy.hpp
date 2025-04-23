@@ -21,8 +21,12 @@ public:
 	inline sf::FloatRect getGlobalBounds() const { return shape.getGlobalBounds(); }
 
 private:
+	void setRotation(const sf::Vector2f& playerPosition);
+	void updateRotation(float deltaTime, const sf::Vector2f& playerPosition);
 	void setPosition(sf::Vector2f position);
 	void updateColor();
+
+	bool isFirstUpdate;
 
 	sf::Vector2f positionCurrent;
 	sf::Vector2f positionPrevious;

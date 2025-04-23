@@ -8,7 +8,7 @@ using namespace Utility;
 
 Player::Player(const sf::RenderWindow& window) :
 	// Shape
-	shapeSize(50.f),
+	shapeSize(80.f),
 	offset(shapeSize / std::sqrt(3.f)),
 	collisionRadius(shapeSize / 2.25f),
 	// Movement
@@ -31,7 +31,7 @@ Player::Player(const sf::RenderWindow& window) :
 	timeSinceLastShot(sf::seconds(0.f)),
 	fireRate(sf::seconds(0.08f)),
 	bulletSpeedMultiplier(1.f),
-	bulletSizeMultiplier(1.1f)
+	bulletSizeMultiplier(1.f)
 {
 	// Initialize the shape
 	shape.setPointCount(3);

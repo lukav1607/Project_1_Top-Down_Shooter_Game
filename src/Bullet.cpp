@@ -9,9 +9,9 @@ Bullet::Bullet(const sf::Vector2f& position, const sf::Angle& angle, sf::Color c
 	positionCurrent(position),
 	positionPrevious(positionCurrent),
 	isMarkedForDeletion(false),
-	damage(10)
+	damage(20)
 {
-	shape.setRadius(5.f * sizeMultiplier);
+	shape.setRadius(8.f * sizeMultiplier);
 	collisionRadius = shape.getRadius();
 	shape.setFillColor(color);
 	shape.setOrigin({ shape.getRadius() , shape.getRadius() });
