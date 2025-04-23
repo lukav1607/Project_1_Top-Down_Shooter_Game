@@ -9,6 +9,7 @@ using namespace Utility;
 
 Enemy::Enemy() :
 	isFirstUpdate(true),
+	needsDeleting(false),
 	positionCurrent({ 0.f, 0.f }),
 	positionPrevious(positionCurrent),
 	shapeSize(60.f),
@@ -22,7 +23,7 @@ Enemy::Enemy() :
 	anglePrevious(angleCurrent),
 	rotationSpeed(2.f),
 	healthMax(100.f),
-	health(healthMax),
+	healthCurrent(healthMax),
 	flashTimer(sf::seconds(0.f))
 {
 	shape.setSize({ shapeSize, shapeSize });
@@ -31,8 +32,14 @@ Enemy::Enemy() :
 	shape.setPosition({ 0.f, 0.f });
 }
 
-void Enemy::update(float deltaTime, const sf::RenderWindow& window, sf::Vector2f playerPosition)
+int Enemy::update(float deltaTime, const sf::RenderWindow& window, sf::Vector2f playerPosition)
 {
+	if (healthCurrent <= 0.f && !needsDeleting)
+	{
+		needsDeleting = true;
+		return calculateScoreValue();
+	}
+
 	if (isFirstUpdate)
 	{
 		setRandomSpawnPosition(window);
@@ -73,6 +80,8 @@ void Enemy::update(float deltaTime, const sf::RenderWindow& window, sf::Vector2f
 	{
 		updateColor();
 	}
+
+	return 0;
 }
 
 void Enemy::render(float alpha, sf::RenderWindow& window, bool isDebugModeOn)
@@ -99,7 +108,7 @@ void Enemy::render(float alpha, sf::RenderWindow& window, bool isDebugModeOn)
 
 void Enemy::decreaseHealthBy(int amount)
 {
-	health -= amount;
+	healthCurrent -= amount;
 	flashTimer = sf::seconds(0.025f); // Flash for 0.1 seconds
 	updateColor();
 }
@@ -121,26 +130,31 @@ void Enemy::setRandomSpawnPosition(const sf::RenderWindow& window)
 	{
 	case TOP:
 		spawnPosition.x = rand() % window.getSize().x;  // Random X within window width
-		spawnPosition.y = -shape.getSize().y;			// Spawn just above the window
+		spawnPosition.y = -shape.getSize().y * 1.5f;			// Spawn just above the window
 		break;
 
 	case BOTTOM:
 		spawnPosition.x = rand() % window.getSize().x;  // Random X within window width
-		spawnPosition.y = window.getSize().y;           // Spawn just below the window
+		spawnPosition.y = window.getSize().y * 1.5f;           // Spawn just below the window
 		break;
 
 	case LEFT:
-		spawnPosition.x = -shape.getSize().x;			// Spawn just left of the window
+		spawnPosition.x = -shape.getSize().x * 1.5f;			// Spawn just left of the window
 		spawnPosition.y = rand() % window.getSize().y;  // Random Y within window height
 		break;
 
 	case RIGHT:
-		spawnPosition.x = window.getSize().x;           // Spawn just right of the window
+		spawnPosition.x = window.getSize().x * 1.5f;           // Spawn just right of the window
 		spawnPosition.y = rand() % window.getSize().y;  // Random Y within window height
 		break;
 	}
 
 	setPosition(spawnPosition);
+}
+
+int Enemy::calculateScoreValue() const
+{
+	return static_cast<int>(healthMax);
 }
 
 void Enemy::setRotation(const sf::Vector2f& playerPosition)
@@ -185,7 +199,7 @@ void Enemy::setPosition(sf::Vector2f position)
 
 void Enemy::updateColor()
 {
-	float t = 1.f - std::clamp(health / healthMax, 0.f, 1.f);
+	float t = 1.f - std::clamp(healthCurrent / healthMax, 0.f, 1.f);
 
 	float startHue = 300.f;  // deeper purple
 	float endHue = 360.f;    // red

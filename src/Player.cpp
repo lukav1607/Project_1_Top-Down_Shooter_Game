@@ -25,7 +25,8 @@ Player::Player(const sf::RenderWindow& window) :
 	rotationSpeed(5.f),
 	// Health
 	healthMax(100.f),
-	health(healthMax),
+	healthCurrent(healthMax),
+	score(0),
 	// Shooting
 	isShooting(false),
 	timeSinceLastShot(sf::seconds(0.f)),

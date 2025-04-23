@@ -10,23 +10,26 @@ public:
 	Enemy();
 	void setRandomSpawnPosition(const sf::RenderWindow& window);
 
-	void update(float deltaTime, const sf::RenderWindow& window, sf::Vector2f playerPosition);
+	int update(float deltaTime, const sf::RenderWindow& window, sf::Vector2f playerPosition);
 	void render(float alpha, sf::RenderWindow& window, bool isDebugModeOn);
 
 	void decreaseHealthBy(int amount);
 
-	inline float getHealth() const { return health; }
+	bool getNeedsDeleting() const { return needsDeleting; }
+	inline float getHealth() const { return healthCurrent; }
 	inline float getCollisionRadius() const { return collisionRadius; }
 	inline sf::Vector2f getPosition() const { return positionCurrent; }
 	inline sf::FloatRect getGlobalBounds() const { return shape.getGlobalBounds(); }
 
 private:
+	int calculateScoreValue() const;
 	void setRotation(const sf::Vector2f& playerPosition);
 	void updateRotation(float deltaTime, const sf::Vector2f& playerPosition);
 	void setPosition(sf::Vector2f position);
 	void updateColor();
 
 	bool isFirstUpdate;
+	bool needsDeleting;
 
 	sf::Vector2f positionCurrent;
 	sf::Vector2f positionPrevious;
@@ -46,7 +49,7 @@ private:
 	float rotationSpeed;
 
 	float healthMax;
-	float health;
+	float healthCurrent;
 	sf::Time flashTimer;
 
 	std::vector<Bullet> bullets;

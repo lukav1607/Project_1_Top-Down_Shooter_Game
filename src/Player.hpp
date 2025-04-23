@@ -15,7 +15,11 @@ public:
 	void update(float deltaTime, const sf::RenderWindow& window, std::vector<Enemy>& enemies);
 	void render(float alpha, sf::RenderWindow& window, bool isDebugModeOn);
 
+	inline float getHealthCurrent() const { return healthCurrent; }
+	inline float getHealthMax() const { return healthMax; }
 	inline sf::Vector2f getPosition() const { return positionCurrent; }
+
+	int score;
 
 private:
 	void launchBullet();
@@ -42,7 +46,7 @@ private:
 	float rotationSpeed;
 
 	float healthMax;
-	float health;
+	float healthCurrent;
 
 	std::vector<Bullet> bullets;
 	sf::Color bulletColor = sf::Color(255, 230, 100);
