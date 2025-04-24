@@ -28,8 +28,10 @@ int main() {
 	std::vector<Enemy> enemies;
 
     unsigned maxEnemies = 50;
-	sf::Time spawnInterval = sf::seconds(1.f);
 	sf::Time spawnIntervalMin = sf::seconds(0.5f);
+	sf::Time spawnIntervalMax = sf::seconds(1.25f);
+	sf::Time spawnIntervalRampUpTime = sf::seconds(120.f);
+	sf::Time spawnInterval = spawnIntervalMax;
 	sf::Time timeSinceLastSpawn = spawnInterval;
 
 	sf::Font font("assets/fonts/unispace bd.ttf");
@@ -121,9 +123,12 @@ int main() {
 					enemies.emplace_back();
 					enemies.back().initTimeBasedModifiers(gameClock.getElapsedTime());
 					timeSinceLastSpawn = sf::seconds(0.f);
-					spawnInterval /= 1.f + gameClock.getElapsedTime().asSeconds() / 3600.f;
-					if (spawnInterval < spawnIntervalMin)
-						spawnInterval = spawnIntervalMin;
+
+					// Smoothly transition spawnInterval from max to min linearly
+					// After spawnIntervalRampUpTime seconds, it will be at spawnIntervalMin
+					float t = std::min(gameClock.getElapsedTime().asSeconds() / spawnIntervalRampUpTime.asSeconds(), 1.f);
+					spawnInterval = spawnIntervalMax - (spawnIntervalMax - spawnIntervalMin) * t;
+
 					std::cout << "Spawn Interval: " << spawnInterval.asSeconds() << std::endl;
 				}
 
