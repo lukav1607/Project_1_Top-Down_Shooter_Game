@@ -15,9 +15,8 @@ public:
 	void render(float alpha, sf::RenderWindow& window, bool isDebugModeOn);
 
 	void decreaseHealthBy(int amount);
-
 	bool getNeedsDeleting() const { return needsDeleting; }
-	inline float getHealth() const { return healthCurrent; }
+	inline float getHealth() const { return healthMax; }
 	inline float getDamage() const { return damage; }
 	inline float getCollisionRadius() const { return collisionRadius; }
 	inline sf::Vector2f getPosition() const { return positionCurrent; }

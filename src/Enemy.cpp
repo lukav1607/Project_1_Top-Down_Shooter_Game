@@ -43,6 +43,7 @@ void Enemy::initTimeBasedModifiers(sf::Time timeSinceStart)
 	float difficultyFactor = timeSinceStart.asSeconds() / 10.f;
 
 	healthMax *= (1.f + difficultyFactor * healthGrowth) * sizeVariation;
+	healthMax = std::floorf(healthMax);
 	healthCurrent = healthMax;
 
 	maxSpeed *= (1.f + difficultyFactor * speedGrowth) * speedVariation;
@@ -135,6 +136,7 @@ void Enemy::render(float alpha, sf::RenderWindow& window, bool isDebugModeOn)
 void Enemy::decreaseHealthBy(int amount)
 {
 	healthCurrent -= amount;
+	//healthCurrent = std::floorf(healthCurrent);
 	flashTimer = sf::seconds(0.025f); // Flash for 0.1 seconds
 	updateColor();
 }
