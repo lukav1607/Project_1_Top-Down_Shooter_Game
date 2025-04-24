@@ -13,6 +13,8 @@ namespace Utility
 	// Interpolate between two angles
 	sf::Angle interpolate(const sf::Angle& previous, const sf::Angle& current, float alpha);
 
+	float getRandomNumber(float min, float max);
+
 	bool doesCircleIntersectRectangle(sf::Vector2f circleCenter, float circleRadius, sf::FloatRect rectangle);
 	bool doesCircleIntersectCircle(sf::Vector2f circleCenter1, float circleRadius1, sf::Vector2f circleCenter2, float circleRadius2);
 
@@ -21,7 +23,6 @@ namespace Utility
 
 	// Lerp between two colors
 	sf::Color lerp(const sf::Color& start, const sf::Color& end, float t);
-
 	sf::Vector3f rgbToHsv(const sf::Color& color);
 	sf::Color hsvToRgb(float h, float s, float v);
 	sf::Color hsvToRgb(const sf::Vector3f& hsv);

@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
+#include <iostream>
 
 using namespace Utility;
 
@@ -12,6 +13,9 @@ Enemy::Enemy() :
 	needsDeleting(false),
 	positionCurrent({ 0.f, 0.f }),
 	positionPrevious(positionCurrent),
+	speedGrowth(0.02f),
+	sizeGrowth(0.03f),
+	healthGrowth(0.03f),
 	shapeSize(60.f),
 	collisionRadius(shapeSize / 2.f),
 	velocity({ 0.f, 0.f }),
@@ -24,12 +28,34 @@ Enemy::Enemy() :
 	rotationSpeed(2.f),
 	healthMax(100.f),
 	healthCurrent(healthMax),
-	flashTimer(sf::seconds(0.f))
+	flashTimer(sf::seconds(0.f)),
+	damage((shapeSize / 10.f + maxSpeed / 100.f) * 1.9f),
+	scoreValue(0)
 {
-	shape.setSize({ shapeSize, shapeSize });
 	shape.setFillColor(sf::Color::Red);
-	shape.setOrigin(shape.getSize() / 2.f);
 	shape.setPosition({ 0.f, 0.f });
+}
+
+void Enemy::initTimeBasedModifiers(sf::Time timeSinceStart)
+{
+	float speedVariation = getRandomNumber(0.9f, 1.1f); // +/- 10%
+	float sizeVariation = getRandomNumber(0.95f, 1.05f); // +/- 5%
+	float difficultyFactor = timeSinceStart.asSeconds() / 10.f;
+
+	healthMax *= (1.f + difficultyFactor * healthGrowth) * sizeVariation;
+	healthCurrent = healthMax;
+
+	maxSpeed *= (1.f + difficultyFactor * speedGrowth) * speedVariation;
+
+	shapeSize *= (1.f + difficultyFactor * sizeGrowth) * sizeVariation;
+	shape.setSize({ shapeSize, shapeSize });
+	shape.setOrigin(shape.getSize() / 2.f);
+	collisionRadius = shapeSize / 2.f;
+
+	scoreValue = static_cast<int>((maxSpeed * shapeSize) / 1000.f);
+
+	std::cout << "Time: " << timeSinceStart.asSeconds()
+		<< " | Health: " << healthMax << '\n';
 }
 
 int Enemy::update(float deltaTime, const sf::RenderWindow& window, sf::Vector2f playerPosition)
@@ -37,7 +63,7 @@ int Enemy::update(float deltaTime, const sf::RenderWindow& window, sf::Vector2f 
 	if (healthCurrent <= 0.f && !needsDeleting)
 	{
 		needsDeleting = true;
-		return calculateScoreValue();
+		return scoreValue;
 	}
 
 	if (isFirstUpdate)
@@ -129,32 +155,27 @@ void Enemy::setRandomSpawnPosition(const sf::RenderWindow& window)
 	switch (spawnSide)
 	{
 	case TOP:
-		spawnPosition.x = rand() % window.getSize().x;  // Random X within window width
-		spawnPosition.y = -shape.getSize().y * 1.5f;			// Spawn just above the window
+		spawnPosition.x = std::rand() % window.getSize().x;  // Random X within window width
+		spawnPosition.y = -shape.getSize().y * 1.5f;	// Spawn just above the window
 		break;
 
 	case BOTTOM:
-		spawnPosition.x = rand() % window.getSize().x;  // Random X within window width
-		spawnPosition.y = window.getSize().y * 1.5f;           // Spawn just below the window
+		spawnPosition.x = std::rand() % window.getSize().x;  // Random X within window width
+		spawnPosition.y = window.getSize().y * 1.5f;    // Spawn just below the window
 		break;
 
 	case LEFT:
-		spawnPosition.x = -shape.getSize().x * 1.5f;			// Spawn just left of the window
-		spawnPosition.y = rand() % window.getSize().y;  // Random Y within window height
+		spawnPosition.x = -shape.getSize().x * 1.5f;	// Spawn just left of the window
+		spawnPosition.y = std::rand() % window.getSize().y;  // Random Y within window height
 		break;
 
 	case RIGHT:
-		spawnPosition.x = window.getSize().x * 1.5f;           // Spawn just right of the window
-		spawnPosition.y = rand() % window.getSize().y;  // Random Y within window height
+		spawnPosition.x = window.getSize().x * 1.5f;    // Spawn just right of the window
+		spawnPosition.y = std::rand() % window.getSize().y;  // Random Y within window height
 		break;
 	}
 
 	setPosition(spawnPosition);
-}
-
-int Enemy::calculateScoreValue() const
-{
-	return static_cast<int>(healthMax);
 }
 
 void Enemy::setRotation(const sf::Vector2f& playerPosition)

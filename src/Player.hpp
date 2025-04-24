@@ -11,6 +11,7 @@ class Player
 public:
 	Player(const sf::RenderWindow& window);
 
+	void reset(const sf::RenderWindow& window);
 	void handleInput();
 	void update(float deltaTime, const sf::RenderWindow& window, std::vector<Enemy>& enemies);
 	void render(float alpha, sf::RenderWindow& window, bool isDebugModeOn);
@@ -19,16 +20,21 @@ public:
 	inline float getHealthMax() const { return healthMax; }
 	inline sf::Vector2f getPosition() const { return positionCurrent; }
 
+	inline bool isInvincible() const { return iFramesTimer > sf::seconds(0.f); }
+
 	int score;
 
 private:
 	void launchBullet();
+	void takeDamage(int amount);
+
 	void updateMovement(float deltaTime);
 	void updateRotation(float deltaTime, const sf::RenderWindow& window);
 	void updateShooting(float deltaTime, const sf::RenderWindow& window, std::vector<Enemy>& enemies);
 	void updateCollisions(float deltaTime, const sf::RenderWindow& window, std::vector<Enemy>& enemies);
 
 	sf::ConvexShape shape;
+	sf::Color shapeColor;
 	float shapeSize;
 	float offset; // Offset from center to the tip of the player shape
 	float collisionRadius;
@@ -47,6 +53,8 @@ private:
 
 	float healthMax;
 	float healthCurrent;
+	const sf::Time IFRAMES = sf::seconds(0.75f);
+	sf::Time iFramesTimer;
 
 	std::vector<Bullet> bullets;
 	sf::Color bulletColor = sf::Color(255, 230, 100);

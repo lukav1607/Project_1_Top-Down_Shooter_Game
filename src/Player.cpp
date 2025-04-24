@@ -7,8 +7,10 @@
 using namespace Utility;
 
 Player::Player(const sf::RenderWindow& window) :
+	score(0),
 	// Shape
 	shapeSize(80.f),
+	shapeColor(sf::Color(120, 255, 255)),
 	offset(shapeSize / std::sqrt(3.f)),
 	collisionRadius(shapeSize / 2.25f),
 	// Movement
@@ -26,7 +28,7 @@ Player::Player(const sf::RenderWindow& window) :
 	// Health
 	healthMax(100.f),
 	healthCurrent(healthMax),
-	score(0),
+	iFramesTimer(sf::seconds(0.f)),
 	// Shooting
 	isShooting(false),
 	timeSinceLastShot(sf::seconds(0.f)),
@@ -42,7 +44,22 @@ Player::Player(const sf::RenderWindow& window) :
 	shape.setPoint(2, { -height / 3.f, shapeSize / 2.f });  // Bottom right point
 	shape.setOrigin((shape.getPoint(0) + shape.getPoint(1) + shape.getPoint(2)) / 3.f);
 	shape.setPosition(positionCurrent);
-	shape.setFillColor(sf::Color(120, 255, 255));
+	shape.setFillColor(shapeColor);
+}
+
+void Player::reset(const sf::RenderWindow& window)
+{
+	// Reset player state
+	positionCurrent = { window.getSize().x / 2.f, window.getSize().y / 2.f };
+	positionPrevious = positionCurrent;
+	velocity = { 0.f, 0.f };
+	direction = { 0.f, 0.f };
+	angleCurrent = sf::degrees(0.f);
+	anglePrevious = angleCurrent;
+	healthCurrent = healthMax;
+	iFramesTimer = sf::seconds(0.f);
+	bullets.clear();
+	score = 0;
 }
 
 void Player::handleInput()
@@ -67,6 +84,9 @@ void Player::handleInput()
 
 void Player::update(float deltaTime, const sf::RenderWindow& window, std::vector<Enemy>& enemies)
 {
+	if (iFramesTimer > sf::seconds(0.f))
+		iFramesTimer -= sf::seconds(deltaTime);
+
 	updateMovement(deltaTime);
 	updateRotation(deltaTime, window);
 	updateShooting(deltaTime, window, enemies);
@@ -83,6 +103,18 @@ void Player::render(float alpha, sf::RenderWindow& window, bool isDebugModeOn)
 
 	// Interpolate between the previous and current angle for smooth rendering
 	shape.setRotation(interpolate(anglePrevious, angleCurrent, alpha));
+
+	// Set the color of the shape based on the invincibility state
+	if (isInvincible())
+	{
+		sf::Color color = shape.getFillColor();
+		color.a = static_cast<std::uint8_t>(std::abs(std::sin(iFramesTimer.asSeconds() * 10.f)) * 255);
+		shape.setFillColor(color);
+	}
+	else
+	{
+		shape.setFillColor(shapeColor);
+	}
 
 	window.draw(shape);
 
@@ -107,6 +139,15 @@ void Player::launchBullet()
 	bullets.emplace_back(shapeTip, angleCurrent, bulletColor, bulletSpeedMultiplier, bulletSizeMultiplier);
 
 	timeSinceLastShot = sf::seconds(0.f); // Reset the shot timer
+}
+
+void Player::takeDamage(int amount)
+{
+	if (iFramesTimer <= sf::seconds(0.f))
+	{
+		healthCurrent -= amount;
+		iFramesTimer = IFRAMES; // Reset the invincibility frames timer
+	}
 }
 
 void Player::updateMovement(float deltaTime)
@@ -169,7 +210,6 @@ void Player::updateShooting(float deltaTime, const sf::RenderWindow& window, std
 		for (auto& enemy : enemies)
 		{
 			if (doesCircleIntersectCircle(bullet.getPosition(), bullet.getCollisionRadius(), enemy.getPosition(), enemy.getCollisionRadius()))
-			//if (enemy.getGlobalBounds().findIntersection(bullet.getGlobalBounds()))
 			{
 				enemy.decreaseHealthBy(bullet.getDamage());
 				bullet.markForDeletion();
@@ -194,9 +234,14 @@ void Player::updateCollisions(float deltaTime, const sf::RenderWindow& window, s
 	// Check for collisions with enemies
 	for (auto& enemy : enemies)
 	{
-		if (doesCircleIntersectCircle(positionCurrent, collisionRadius, enemy.getPosition(), enemy.getCollisionRadius()))
+		if (doesCircleIntersectCircle(positionCurrent, collisionRadius, enemy.getPosition(), enemy.getCollisionRadius())
+			&& !isInvincible())
 		{
-			std::cout << "Collision with enemy!" << std::endl;
+			takeDamage(enemy.getDamage());
+			enemy.decreaseHealthBy(enemy.getHealth());
+			if (healthCurrent <= 0.f)
+				healthCurrent = 0.f;
+			enemy.scoreValue = 0;
 		}
 	}
 }

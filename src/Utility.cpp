@@ -2,6 +2,7 @@
 
 #include <SFML/System.hpp>
 #include <map>
+#include <random>
 
 sf::Vector2f Utility::normalize(const sf::Vector2f& vector)
 {
@@ -23,6 +24,14 @@ sf::Vector2f Utility::interpolate(const sf::Vector2f& previous, const sf::Vector
 sf::Angle Utility::interpolate(const sf::Angle& previous, const sf::Angle& current, float alpha)
 {
 	return previous * (1.f - alpha) + current * alpha;
+}
+
+float Utility::getRandomNumber(float min, float max)
+{
+	static std::random_device rd;
+	static std::mt19937 gen(rd());
+	std::uniform_real_distribution<float> dist(min, max);
+	return dist(gen);
 }
 
 bool Utility::doesCircleIntersectRectangle(sf::Vector2f circleCenter, float circleRadius, sf::FloatRect rectangle)
