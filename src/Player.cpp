@@ -18,23 +18,18 @@ Player::Player(sf::Vector2u windowSize) :
 	positionPrevious(positionCurrent),
 	velocity(0.f, 0.f),
 	direction(0.f, 0.f),
-	acceleration(1000.f),
-	maxSpeed(500.f),
 	dampingFactor(0.95f),
 	// Rotation
 	angleCurrent(sf::degrees(0.f)),
 	anglePrevious(angleCurrent),
 	rotationSpeed(5.f),
 	// Health
-	healthMax(100.f),
-	healthCurrent(healthMax),
+	livesMax(5U),
+	livesCurrent(livesMax),
 	iFramesTimer(sf::seconds(0.f)),
 	// Shooting
 	isShooting(false),
-	timeSinceLastShot(sf::seconds(0.f)),
-	fireRate(sf::seconds(0.1f)),
-	bulletSpeedMultiplier(1.f),
-	bulletSizeMultiplier(1.f)
+	timeSinceLastShot(sf::seconds(0.f))
 {
 	// Initialize the shape
 	shape.setPointCount(3);
@@ -45,6 +40,16 @@ Player::Player(sf::Vector2u windowSize) :
 	shape.setOrigin((shape.getPoint(0) + shape.getPoint(1) + shape.getPoint(2)) / 3.f);
 	shape.setPosition(positionCurrent);
 	shape.setFillColor(shapeColor);
+
+	buffedStats =
+	{
+		sf::seconds(0.095f), // Fire rate
+		2,				     // Bullet damage
+		0.8f,			     // Bullet speed multiplier
+		1.25f,			     // Bullet size multiplier
+		750.f,			     // Max speed
+		1250.f 			     // Acceleration
+	};
 }
 
 void Player::reset(sf::Vector2u windowSize)
@@ -56,7 +61,7 @@ void Player::reset(sf::Vector2u windowSize)
 	direction = { 0.f, 0.f };
 	angleCurrent = sf::degrees(0.f);
 	anglePrevious = angleCurrent;
-	healthCurrent = healthMax;
+	livesCurrent = livesMax;
 	iFramesTimer = sf::seconds(0.f);
 	bullets.clear();
 	score = 0;
@@ -90,7 +95,11 @@ void Player::update(float deltaTime, const sf::RenderWindow& window, std::vector
 	updateMovement(deltaTime);
 	updateRotation(deltaTime, window);
 	updateShooting(deltaTime, window, enemies);
-	updateCollisions(deltaTime, window, enemies);
+	keepWithinWindow(window);
+	managePowerUpExpiration();
+
+	if (livesCurrent <= 0)
+		livesCurrent = 0;
 }
 
 void Player::render(float alpha, sf::RenderWindow& window, bool isDebugModeOn)
@@ -136,17 +145,86 @@ void Player::launchBullet()
 	sf::Vector2f shapeTip = shape.getTransform().transformPoint(shape.getPoint(0));
 
 	// Create a new bullet and add it to the bullets vector
-	bullets.emplace_back(shapeTip, angleCurrent, bulletColor, bulletSpeedMultiplier, bulletSizeMultiplier);
+	bullets.emplace_back(shapeTip, angleCurrent, currentStats.bulletDamage, bulletColor, currentStats.bulletSpeedMultiplier, currentStats.bulletSizeMultiplier);
 
 	timeSinceLastShot = sf::seconds(0.f); // Reset the shot timer
 }
 
-void Player::takeDamage(int amount)
+void Player::managePowerUpExpiration()
+{
+	for (auto it = activePowerUps.begin(); it != activePowerUps.end(); ++it)
+	{
+		// Remove expired power-ups
+		if ((*it)->getNeedsDeleting())
+		{
+			// Reset the player's stats based on the power-up type
+			switch ((*it)->getType())
+			{
+			case PowerUp::Type::DAMAGE:
+				currentStats.bulletDamage = DEFAULT_STATS.bulletDamage;
+				currentStats.bulletSizeMultiplier = DEFAULT_STATS.bulletSizeMultiplier;
+				currentStats.bulletSpeedMultiplier = DEFAULT_STATS.bulletSpeedMultiplier;
+				std::cout << "Damage power-up expired!" << std::endl;
+				break;
+			case PowerUp::Type::FIRE_RATE:
+				currentStats.fireRate = DEFAULT_STATS.fireRate;
+				std::cout << "Fire rate power-up expired!" << std::endl;
+				break;
+			case PowerUp::Type::SPEED:
+				currentStats.maxSpeed = DEFAULT_STATS.maxSpeed;
+				currentStats.acceleration = DEFAULT_STATS.acceleration;
+				std::cout << "Speed power-up expired!" << std::endl;
+				break;
+			case PowerUp::Type::HEALTH:
+				break; // Health power-ups don't expire
+			}
+
+			// Remove the power-up from the activePowerUps vector
+			it = activePowerUps.erase(it);
+			if (it == activePowerUps.end()) 
+				break;
+		}
+	}
+}
+
+void Player::loseLife(unsigned amount)
 {
 	if (iFramesTimer <= sf::seconds(0.f))
 	{
-		healthCurrent -= amount;
+		livesCurrent -= amount;
 		iFramesTimer = IFRAMES; // Reset the invincibility frames timer
+	}
+}
+
+void Player::applyPowerUp(std::shared_ptr<PowerUp> powerUp)
+{
+	activePowerUps.push_back(powerUp);
+
+	switch (activePowerUps.back()->getType())
+	{
+	case PowerUp::Type::DAMAGE:
+		currentStats.bulletDamage = buffedStats.bulletDamage;
+		currentStats.bulletSizeMultiplier = buffedStats.bulletSizeMultiplier;
+		currentStats.bulletSpeedMultiplier = buffedStats.bulletSpeedMultiplier;
+		std::cout << "Damage power-up applied!" << std::endl;
+		break;
+
+	case PowerUp::Type::FIRE_RATE:
+		currentStats.fireRate = buffedStats.fireRate;
+		std::cout << "Fire rate power-up applied!" << std::endl;
+		break;
+
+	case PowerUp::Type::SPEED:
+		currentStats.maxSpeed = buffedStats.maxSpeed;
+		currentStats.acceleration = buffedStats.acceleration;
+		std::cout << "Speed power-up applied!" << std::endl;
+		break;
+
+	case PowerUp::Type::HEALTH:
+		if (livesCurrent < livesMax)
+			livesCurrent += 1;
+		std::cout << "Health power-up applied!" << std::endl;
+		break;
 	}
 }
 
@@ -156,13 +234,13 @@ void Player::updateMovement(float deltaTime)
 	if (direction.x != 0.f || direction.y != 0.f)
 	{
 		direction = normalize(direction);
-		velocity += direction * acceleration * deltaTime;
+		velocity += direction * currentStats.acceleration * deltaTime;
 	}
 
 	// Clamp the velocity to the max speed
 	float speed = std::sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
-	if (speed > maxSpeed)
-		velocity = (velocity / speed) * maxSpeed;
+	if (speed > currentStats.maxSpeed)
+		velocity = (velocity / speed) * currentStats.maxSpeed;
 
 	// Apply damping (simple friction)
 	velocity *= std::pow(dampingFactor, deltaTime * 60.f); // Assuming 60 FPS
@@ -197,7 +275,7 @@ void Player::updateShooting(float deltaTime, const sf::RenderWindow& window, std
 {
 	// Shooting Logic
 	timeSinceLastShot += sf::seconds(deltaTime);
-	if (isShooting && timeSinceLastShot >= fireRate)
+	if (isShooting && timeSinceLastShot >= currentStats.fireRate)
 		launchBullet();
 
 	// Remove off screen bullets
@@ -219,9 +297,9 @@ void Player::updateShooting(float deltaTime, const sf::RenderWindow& window, std
 	}
 }
 
-void Player::updateCollisions(float deltaTime, const sf::RenderWindow& window, std::vector<Enemy>& enemies)
+void Player::keepWithinWindow(const sf::RenderWindow& window)
 {
-	// Check for collisions with window bounds
+	// Keep the player within the window bounds
 	if (positionCurrent.x + collisionRadius > window.getSize().x)
 		positionCurrent.x = window.getSize().x - collisionRadius;
 	else if (positionCurrent.x - collisionRadius < 0.f)
@@ -230,18 +308,4 @@ void Player::updateCollisions(float deltaTime, const sf::RenderWindow& window, s
 		positionCurrent.y = window.getSize().y - collisionRadius;
 	else if (positionCurrent.y - collisionRadius < 0.f)
 		positionCurrent.y = collisionRadius;
-
-	// Check for collisions with enemies
-	for (auto& enemy : enemies)
-	{
-		if (doesCircleIntersectCircle(positionCurrent, collisionRadius, enemy.getPosition(), enemy.getCollisionRadius())
-			&& !isInvincible())
-		{
-			takeDamage(enemy.getDamage());
-			enemy.decreaseHealthBy(enemy.getHealth());
-			if (healthCurrent <= 0.f)
-				healthCurrent = 0.f;
-			enemy.scoreValue = 0;
-		}
-	}
 }

@@ -10,7 +10,6 @@ public:
 		DAMAGE,
 		FIRE_RATE,
 		SPEED,
-		SHRINK,
 		HEALTH
 	};
 
@@ -20,9 +19,12 @@ public:
 	void update(float deltaTime);
 	void render(float alpha, sf::RenderWindow& window, bool isDebugModeOn);
 
+	inline bool getIsPickedUp() const { return isPickedUp; }
 	inline bool getNeedsDeleting() const { return needsDeleting; }
 	inline Type getType() const { return type; }
 	inline sf::Time getTimeLeft() const { return buffDuration - timer; }
+	inline sf::Vector2f getPosition() const { return shape.getPosition(); }
+	inline float getCollisionRadius() const { return collisionRadius; }
 
 private:
 	sf::RectangleShape shape;

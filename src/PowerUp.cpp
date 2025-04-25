@@ -14,21 +14,22 @@ PowerUp::PowerUp(const sf::Vector2u& windowSize) :
 	collisionRadius(shapeSize / 2.f),
 	isPickedUp(false),
 	needsDeleting(false),
-	buffDuration(sf::seconds(15.f)),
+	buffDuration(sf::seconds(7.5f)),
 	timeout(sf::seconds(7.5f)),
 	timer(sf::seconds(0.f)),
 	type(Type::DAMAGE)
 {
 	shape.setSize({ shapeSize, shapeSize });
 	shape.setOrigin({ shapeSize / 2.f, shapeSize / 2.f });
-	shape.setRotation(sf::degrees(getRandomNumber(0.f, 360.f)));
+	//shape.setRotation(sf::degrees(getRandomNumber(0.f, 360.f)));
+	shape.setRotation(sf::degrees(45.f));
 	shape.setPosition
 	( 
 		{ getRandomNumber(shapeSize, windowSize.x - shapeSize),
 		getRandomNumber(shapeSize, windowSize.y - shapeSize) }
 	);
 
-	int randomType = getRandomNumber(0, 5);
+	int randomType = getRandomNumber(0, 4);
 	switch (randomType)
 	{
 	case 0:
@@ -44,10 +45,6 @@ PowerUp::PowerUp(const sf::Vector2u& windowSize) :
 		shape.setFillColor(sf::Color(122, 204, 242));
 		break;
 	case 3:
-		type = Type::SHRINK;
-		shape.setFillColor(sf::Color(198, 145, 216));
-		break;
-	case 4:
 		type = Type::HEALTH;
 		shape.setFillColor(sf::Color(242, 138, 154));
 		break;
@@ -74,7 +71,7 @@ void PowerUp::update(float deltaTime)
 	}
 	else
 	{
-		if (timer >= buffDuration)
+		if (timer >= buffDuration || type == Type::HEALTH)
 			needsDeleting = true;
 	}
 }

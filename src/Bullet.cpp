@@ -5,11 +5,11 @@
 
 using Utility::interpolate;
 
-Bullet::Bullet(const sf::Vector2f& position, const sf::Angle& angle, sf::Color color, float speedMultiplier, float sizeMultiplier) :
+Bullet::Bullet(const sf::Vector2f& position, const sf::Angle& angle, int damage, sf::Color color, float speedMultiplier, float sizeMultiplier) :
 	positionCurrent(position),
 	positionPrevious(positionCurrent),
 	isMarkedForDeletion(false),
-	damage(20)
+	damage(damage)
 {
 	shape.setRadius(8.f * sizeMultiplier);
 	collisionRadius = shape.getRadius();

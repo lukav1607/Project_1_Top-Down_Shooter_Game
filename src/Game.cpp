@@ -1,6 +1,8 @@
 #include "Game.hpp"
 #include "Utility.hpp"
 
+#include <iostream>
+
 using namespace Utility;
 
 Game::Text::Text(const sf::Font& font, sf::Vector2u windowSize) :
@@ -64,14 +66,14 @@ Game::Game() :
 	enemySpawnParams.intervalMax = sf::seconds(1.25f);
 	enemySpawnParams.rampUpTime = sf::seconds(120.f);
 	enemySpawnParams.intervalCurrent = enemySpawnParams.intervalMax;
-	enemySpawnParams.timeSinceLastSpawn = enemySpawnParams.intervalCurrent;
+	enemySpawnParams.timeSinceLastSpawn = sf::seconds(0.f);
 
 	// Powerup spawn parameters
-	powerupSpawnParams.intervalMin = sf::seconds(15.f);
-	powerupSpawnParams.intervalMax = sf::seconds(30.f);
+	powerupSpawnParams.intervalMin = sf::seconds(10.f);
+	powerupSpawnParams.intervalMax = sf::seconds(20.f);
 	powerupSpawnParams.rampUpTime = sf::seconds(120.f);
 	powerupSpawnParams.intervalCurrent = powerupSpawnParams.intervalMax;
-	powerupSpawnParams.timeSinceLastSpawn = powerupSpawnParams.intervalCurrent;
+	powerupSpawnParams.timeSinceLastSpawn = sf::seconds(0.f);
 
 	// Seed the random number generator
 	std::srand(static_cast<unsigned>(std::time(nullptr)));
@@ -143,22 +145,37 @@ void Game::update()
 		{
 			processSpawns();
 
-			for (auto& powerup : powerups)
-				powerup.update(TIMESTEP);
+			// Update powerups
+			for (auto it = powerups.begin(); it != powerups.end(); ++it)
+			{
+				// Update powerups and check for pickup by player
+				powerups.at(it - powerups.begin())->update(TIMESTEP);
+				processCollisionsWithPlayer(*it);
 
-			for (auto& enemy : enemies)
+				// Remove expired powerups
+				if ((*it)->getNeedsDeleting())
+				{
+					it = powerups.erase(it);
+					if (it == powerups.end())
+						break;
+				}
+			}
+			// Update enemies
+			for (auto& enemy : enemies) {
+				// Update enemy and add score if it is killed
 				player.score += enemy.update(TIMESTEP, window, player.getPosition());
+				processCollisionsWithPlayer(enemy);
+			}
 
 			player.update(TIMESTEP, window, enemies);
-			hud.update(window, player.getHealthCurrent(), player.getHealthMax(), player.score);
+
+			hud.update(window, player.getLivesCurrent(), player.getLivesMax(), player.score);
 
 			// Remove dead enemies
 			enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const Enemy& e) { return e.getNeedsDeleting(); }), enemies.end());
-			// Remove timed-out powerups
-			powerups.erase(std::remove_if(powerups.begin(), powerups.end(), [](const PowerUp& p) { return p.getNeedsDeleting(); }), powerups.end());
 
 			// On player death
-			if (player.getHealthCurrent() <= 0.f)
+			if (player.getLivesCurrent() <= 0)
 			{
 				gameState = GameState::GAME_OVER;
 				text.score.setString("Score: " + std::to_string(player.score));
@@ -196,7 +213,7 @@ void Game::render()
 		player.render(alpha, window, isDebugModeOn);
 
 		for (auto& powerup : powerups)
-			powerup.render(alpha, window, isDebugModeOn);
+			powerup->render(alpha, window, isDebugModeOn);
 
 		for (auto& enemy : enemies)
 			enemy.render(alpha, window, isDebugModeOn);
@@ -227,12 +244,33 @@ void Game::processSpawns()
 	powerupSpawnParams.timeSinceLastSpawn += sf::seconds(TIMESTEP);
 	if (powerupSpawnParams.timeSinceLastSpawn >= powerupSpawnParams.intervalCurrent)
 	{
-		powerups.emplace_back(window.getSize());
+		powerups.emplace_back(std::make_shared<PowerUp>(window.getSize()));
 		powerupSpawnParams.timeSinceLastSpawn = sf::seconds(0.f);
 
 		// Smoothly transition intervalCurrent from max to min linearly
 		// After rampUpTime seconds, it will be at intervalMin
 		float t = std::min(gameClock.getElapsedTime().asSeconds() / powerupSpawnParams.rampUpTime.asSeconds(), 1.f);
 		powerupSpawnParams.intervalCurrent = powerupSpawnParams.intervalMax - (powerupSpawnParams.intervalMax - powerupSpawnParams.intervalMin) * t;
+	}
+}
+
+void Game::processCollisionsWithPlayer(Enemy& enemy)
+{
+	if (doesCircleIntersectCircle(player.getPosition(), player.getCollisionRadius(), enemy.getPosition(), enemy.getCollisionRadius())
+		&& !player.isInvincible())
+	{
+		player.loseLife();
+		enemy.decreaseHealthBy(enemy.getHealth());
+		enemy.scoreValue = 0;
+	}
+}
+
+void Game::processCollisionsWithPlayer(std::shared_ptr<PowerUp> powerUp)
+{
+	if (doesCircleIntersectCircle(player.getPosition(), player.getCollisionRadius(), powerUp->getPosition(), powerUp->getCollisionRadius())
+		&& !powerUp->getIsPickedUp())
+	{
+		powerUp->activate();
+		player.applyPowerUp(powerUp);
 	}
 }

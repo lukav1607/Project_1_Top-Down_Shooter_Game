@@ -27,6 +27,8 @@ private:
 	void render();
 
 	void processSpawns();
+	void processCollisionsWithPlayer(Enemy& enemy);
+	void processCollisionsWithPlayer(std::shared_ptr<PowerUp> powerUp);
 		
 	sf::RenderWindow window;
 	sf::ContextSettings settings;
@@ -70,7 +72,7 @@ private:
 	unsigned maxEnemies;
 	SpawnParameters enemySpawnParams;
 
-	std::vector<PowerUp> powerups;
+	std::vector<std::shared_ptr<PowerUp>> powerups;
 	SpawnParameters powerupSpawnParams;
 	
 };
