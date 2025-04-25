@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include "Player.hpp"
 #include "Enemy.hpp"
+#include "PowerUp.hpp"
 #include "HUD.hpp"
 #include "Utility.hpp"
 
@@ -26,13 +27,20 @@ int main() {
 
     Player player(window);
 	std::vector<Enemy> enemies;
+	std::vector<PowerUp> powerups;
 
     unsigned maxEnemies = 50;
 	sf::Time spawnIntervalMin = sf::seconds(0.5f);
 	sf::Time spawnIntervalMax = sf::seconds(1.25f);
-	sf::Time spawnIntervalRampUpTime = sf::seconds(120.f);
+	sf::Time spawnIntervalRampUp = sf::seconds(120.f);
 	sf::Time spawnInterval = spawnIntervalMax;
 	sf::Time timeSinceLastSpawn = spawnInterval;
+
+	sf::Time powerupSpawnIntervalMin = sf::seconds(15.f);
+	sf::Time powerupSpawnIntervalMax = sf::seconds(30.f);
+	sf::Time powerupSpawnIntervalRampUp = sf::seconds(120.f);
+	sf::Time powerupSpawnInterval = powerupSpawnIntervalMax;
+	sf::Time powerupTimeSinceLastSpawn = powerupSpawnInterval;
 
 	sf::Font font("assets/fonts/unispace bd.ttf");
 	HUD hud(font, window);
@@ -126,19 +134,36 @@ int main() {
 
 					// Smoothly transition spawnInterval from max to min linearly
 					// After spawnIntervalRampUpTime seconds, it will be at spawnIntervalMin
-					float t = std::min(gameClock.getElapsedTime().asSeconds() / spawnIntervalRampUpTime.asSeconds(), 1.f);
+					float t = std::min(gameClock.getElapsedTime().asSeconds() / spawnIntervalRampUp.asSeconds(), 1.f);
 					spawnInterval = spawnIntervalMax - (spawnIntervalMax - spawnIntervalMin) * t;
-
-					std::cout << "Spawn Interval: " << spawnInterval.asSeconds() << std::endl;
 				}
+
+				powerupTimeSinceLastSpawn += sf::seconds(TIMESTEP);
+				if (powerupTimeSinceLastSpawn >= powerupSpawnInterval)
+				{
+					powerups.emplace_back(window.getSize());
+					powerupTimeSinceLastSpawn = sf::seconds(0.f);
+
+					// Smoothly transition powerupSpawnInterval from max to min linearly
+					// After powerupSpawnIntervalRampUpTime seconds, it will be at powerupSpawnIntervalMin
+					float t = std::min(gameClock.getElapsedTime().asSeconds() / powerupSpawnIntervalRampUp.asSeconds(), 1.f);
+					powerupSpawnInterval = powerupSpawnIntervalMax - (powerupSpawnIntervalMax - powerupSpawnIntervalMin) * t;
+				}
+
+				for (auto& powerup : powerups)
+					powerup.update(TIMESTEP);
 
 				for (auto& enemy : enemies)
 					player.score += enemy.update(TIMESTEP, window, player.getPosition());
+
 				player.update(TIMESTEP, window, enemies);
 				hud.update(window, player.getHealthCurrent(), player.getHealthMax(), player.score);
 
 				// Remove dead enemies
 				enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const Enemy& e) { return e.getNeedsDeleting(); }), enemies.end());
+				// Remove timed-out powerups
+				powerups.erase(std::remove_if(powerups.begin(), powerups.end(), [](const PowerUp& p) { return p.getNeedsDeleting(); }), powerups.end());
+
 				if (player.getHealthCurrent() <= 0.f)
 				{
 					isGameOver = true;
@@ -154,8 +179,13 @@ int main() {
 			window.clear();
 
 			player.render(alpha, window, isDebugModeOn);
+
+			for (auto& powerup : powerups)
+				powerup.render(alpha, window, isDebugModeOn);
+
 			for (auto& enemy : enemies)
 				enemy.render(alpha, window, isDebugModeOn);
+
 			hud.render(window);
 
 			window.display();

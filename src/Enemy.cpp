@@ -29,7 +29,7 @@ Enemy::Enemy() :
 	healthMax(100.f),
 	healthCurrent(healthMax),
 	flashTimer(sf::seconds(0.f)),
-	damage((shapeSize / 10.f + maxSpeed / 100.f) * 1.9f),
+	damage((shapeSize / 10.f + maxSpeed / 100.f) * 1.75f),
 	scoreValue(0)
 {
 	shape.setFillColor(sf::Color::Red);
@@ -53,10 +53,9 @@ void Enemy::initTimeBasedModifiers(sf::Time timeSinceStart)
 	shape.setOrigin(shape.getSize() / 2.f);
 	collisionRadius = shapeSize / 2.f;
 
-	scoreValue = static_cast<int>((maxSpeed * shapeSize) / 1000.f);
+	damage = (shapeSize / 10.f + maxSpeed / 100.f) * 1.75f,
 
-	std::cout << "Time: " << timeSinceStart.asSeconds()
-		<< " | Health: " << healthMax << '\n';
+	scoreValue = static_cast<int>((maxSpeed * shapeSize) / 1000.f);
 }
 
 int Enemy::update(float deltaTime, const sf::RenderWindow& window, sf::Vector2f playerPosition)

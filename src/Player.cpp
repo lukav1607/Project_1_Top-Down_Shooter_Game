@@ -32,7 +32,7 @@ Player::Player(const sf::RenderWindow& window) :
 	// Shooting
 	isShooting(false),
 	timeSinceLastShot(sf::seconds(0.f)),
-	fireRate(sf::seconds(0.08f)),
+	fireRate(sf::seconds(0.1f)),
 	bulletSpeedMultiplier(1.f),
 	bulletSizeMultiplier(1.f)
 {

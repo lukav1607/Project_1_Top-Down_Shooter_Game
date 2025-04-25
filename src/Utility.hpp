@@ -14,6 +14,7 @@ namespace Utility
 	sf::Angle interpolate(const sf::Angle& previous, const sf::Angle& current, float alpha);
 
 	float getRandomNumber(float min, float max);
+	int getRandomNumber(int min, int max);
 
 	bool doesCircleIntersectRectangle(sf::Vector2f circleCenter, float circleRadius, sf::FloatRect rectangle);
 	bool doesCircleIntersectCircle(sf::Vector2f circleCenter1, float circleRadius1, sf::Vector2f circleCenter2, float circleRadius2);

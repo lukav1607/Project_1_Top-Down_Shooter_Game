@@ -34,6 +34,14 @@ float Utility::getRandomNumber(float min, float max)
 	return dist(gen);
 }
 
+int Utility::getRandomNumber(int min, int max)
+{
+	static std::random_device rd;
+	static std::mt19937 gen(rd());
+	std::uniform_int_distribution<int> dist(min, max);
+	return dist(gen);
+}
+
 bool Utility::doesCircleIntersectRectangle(sf::Vector2f circleCenter, float circleRadius, sf::FloatRect rectangle)
 {
 	// Find the closest point to the circle within the rectangle
