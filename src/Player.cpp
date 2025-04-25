@@ -280,7 +280,7 @@ void Player::updateShooting(float deltaTime, const sf::RenderWindow& window, std
 		launchBullet();
 
 	// Remove off screen bullets
-	bullets.erase(std::remove_if(bullets.begin(), bullets.end(), [](const Bullet& b) { return b.getIsMarkedForDeletion(); }), bullets.end());
+	//bullets.erase(std::remove_if(bullets.begin(), bullets.end(), [](const Bullet& b) { return b.getIsMarkedForDeletion(); }), bullets.end());
 
 	// Update bullets and detect collisions with enemies
 	//for (auto& bullet : bullets)
