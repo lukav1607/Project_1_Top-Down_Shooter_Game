@@ -7,21 +7,19 @@ PowerUp::PowerUp(const sf::Vector2u& windowSize, int playerLivesCurrent, unsigne
 	rotationSpeed(10.f),
 	scaleCurrent(1.f),
 	scalePrevious(1.f),
-	scaleMax(1.25f),
-	scaleMin(0.75f),
-	scaleSpeed(1.f),
-	shapeSize(33.f),
+	scaleAmplitude(0.15f),
+	scaleSpeed(3.f),
+	shapeSize(40.f),
 	collisionRadius(shapeSize / 2.f),
 	isPickedUp(false),
 	needsDeleting(false),
-	buffDuration(sf::seconds(7.5f)),
-	timeout(sf::seconds(7.5f)),
+	buffDuration(sf::seconds(8.f)),
+	despawnTime(sf::seconds(8.f)),
 	timer(sf::seconds(0.f)),
 	type(Type::DAMAGE)
 {
 	shape.setSize({ shapeSize, shapeSize });
 	shape.setOrigin({ shapeSize / 2.f, shapeSize / 2.f });
-	//shape.setRotation(sf::degrees(getRandomNumber(0.f, 360.f)));
 	shape.setRotation(sf::degrees(45.f));
 	shape.setPosition
 	( 
@@ -29,32 +27,36 @@ PowerUp::PowerUp(const sf::Vector2u& windowSize, int playerLivesCurrent, unsigne
 		getRandomNumber(shapeSize, windowSize.y - shapeSize) }
 	);
 
-	int randomType = getRandomNumber(0, 4);
+	int randomType = getRandomNumber(0, 3);
 
 	// Ensure that the life power-up does not spawn if the player has max lives
 	if (playerLivesCurrent >= playerLivesMax)
 	{
 		while (randomType == 3)
-			randomType = getRandomNumber(0, 4);
+			randomType = getRandomNumber(0, 3);
 	}
 
 	switch (randomType)
 	{
 	case 0:
 		type = Type::DAMAGE;
-		shape.setFillColor(sf::Color(242, 107, 76));
+		color = sf::Color(242, 76, 107);
+		shape.setFillColor(color);
 		break;
 	case 1:
 		type = Type::FIRE_RATE;
-		shape.setFillColor(sf::Color(92, 229, 138));
+		color = sf::Color(92, 229, 138);
+		shape.setFillColor(color);
 		break;
 	case 2:
 		type = Type::SPEED;
-		shape.setFillColor(sf::Color(122, 204, 242));
+		color = sf::Color(122, 204, 242);
+		shape.setFillColor(color);
 		break;
 	case 3:
 		type = Type::LIFE;
-		shape.setFillColor(sf::Color(242, 138, 154));
+		color = sf::Color(242, 138, 154);
+		shape.setFillColor(color);
 		break;
 	}
 }
@@ -71,10 +73,27 @@ void PowerUp::update(float deltaTime)
 
 	if (!isPickedUp)
 	{
-		//anglePrevious = angleCurrent;
-		//angleCurrent += sf::degrees(rotationSpeed * deltaTime);
+		scalePrevious = scaleCurrent;
+		scaleCurrent = std::sin(pulseClock.getElapsedTime().asSeconds() * scaleSpeed) * scaleAmplitude + 1.f;
 
-		if (timer >= timeout)
+		sf::Time flashStartTime = sf::seconds(3.f);
+		sf::Time timeLeft = despawnTime - timer;
+		if (timeLeft <= flashStartTime)
+		{
+			// Flashing effect
+			float progress = 1.f - (timeLeft.asSeconds() / flashStartTime.asSeconds());
+			float flashFrequency = 0.25f + progress * 1.5f;
+			float flash = std::abs(std::sin(timer.asSeconds() * flashFrequency * 3.14159f));
+			sf::Color flashingColor = color;
+			flashingColor.a = static_cast<std::uint8_t>(flash * 255);
+			shape.setFillColor(flashingColor);
+		}
+		else
+		{
+			shape.setFillColor(color);
+		}
+
+		if (timer >= despawnTime)
 			needsDeleting = true;
 	}
 	else
@@ -88,7 +107,7 @@ void PowerUp::render(float alpha, sf::RenderWindow& window, bool isDebugModeOn)
 {
 	if (!isPickedUp)
 	{
-		//shape.setRotation(interpolate(anglePrevious, angleCurrent, alpha));
+		shape.setScale({ interpolate(scalePrevious, scaleCurrent, alpha), interpolate(scalePrevious, scaleCurrent, alpha) });
 
 		window.draw(shape);
 

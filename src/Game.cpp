@@ -69,8 +69,8 @@ Game::Game() :
 	enemySpawnParams.timeSinceLastSpawn = sf::seconds(0.f);
 
 	// Powerup spawn parameters
-	powerupSpawnParams.intervalMin = sf::seconds(10.f);
-	powerupSpawnParams.intervalMax = sf::seconds(20.f);
+	powerupSpawnParams.intervalMin = sf::seconds(12.f);
+	powerupSpawnParams.intervalMax = sf::seconds(18.f);
 	powerupSpawnParams.rampUpTime = sf::seconds(120.f);
 	powerupSpawnParams.intervalCurrent = powerupSpawnParams.intervalMax;
 	powerupSpawnParams.timeSinceLastSpawn = sf::seconds(0.f);
@@ -212,11 +212,11 @@ void Game::render()
 	{
 		player.render(alpha, window, isDebugModeOn);
 
-		for (auto& powerup : powerups)
-			powerup->render(alpha, window, isDebugModeOn);
-
 		for (auto& enemy : enemies)
 			enemy.render(alpha, window, isDebugModeOn);
+
+		for (auto& powerup : powerups)
+			powerup->render(alpha, window, isDebugModeOn);
 
 		hud.render(window);
 	}

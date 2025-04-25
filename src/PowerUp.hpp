@@ -28,6 +28,7 @@ public:
 
 private:
 	sf::RectangleShape shape;
+	sf::Color color;
 	float shapeSize;
 	float collisionRadius;
 
@@ -35,10 +36,10 @@ private:
 	sf::Angle anglePrevious;
 	float rotationSpeed;
 
+	sf::Clock pulseClock;
 	float scaleCurrent;
 	float scalePrevious;
-	float scaleMax;
-	float scaleMin;
+	float scaleAmplitude;
 	float scaleSpeed;
 
 	bool isPickedUp;
@@ -46,6 +47,6 @@ private:
 
 	Type type;
 	sf::Time buffDuration;
-	sf::Time timeout;
+	sf::Time despawnTime;
 	sf::Time timer;
 };
