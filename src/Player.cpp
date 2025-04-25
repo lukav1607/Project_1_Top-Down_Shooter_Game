@@ -6,7 +6,7 @@
 
 using namespace Utility;
 
-Player::Player(const sf::RenderWindow& window) :
+Player::Player(sf::Vector2u windowSize) :
 	score(0),
 	// Shape
 	shapeSize(80.f),
@@ -14,7 +14,7 @@ Player::Player(const sf::RenderWindow& window) :
 	offset(shapeSize / std::sqrt(3.f)),
 	collisionRadius(shapeSize / 2.25f),
 	// Movement
-	positionCurrent(window.getSize().x / 2.f, window.getSize().y / 2.f),
+	positionCurrent(windowSize.x / 2.f, windowSize.y / 2.f),
 	positionPrevious(positionCurrent),
 	velocity(0.f, 0.f),
 	direction(0.f, 0.f),
@@ -47,10 +47,10 @@ Player::Player(const sf::RenderWindow& window) :
 	shape.setFillColor(shapeColor);
 }
 
-void Player::reset(const sf::RenderWindow& window)
+void Player::reset(sf::Vector2u windowSize)
 {
 	// Reset player state
-	positionCurrent = { window.getSize().x / 2.f, window.getSize().y / 2.f };
+	positionCurrent = { windowSize.x / 2.f, windowSize.y / 2.f };
 	positionPrevious = positionCurrent;
 	velocity = { 0.f, 0.f };
 	direction = { 0.f, 0.f };

@@ -9,9 +9,9 @@
 class Player
 {
 public:
-	Player(const sf::RenderWindow& window);
+	Player(sf::Vector2u windowSize);
 
-	void reset(const sf::RenderWindow& window);
+	void reset(sf::Vector2u windowSize);
 	void handleInput();
 	void update(float deltaTime, const sf::RenderWindow& window, std::vector<Enemy>& enemies);
 	void render(float alpha, sf::RenderWindow& window, bool isDebugModeOn);
