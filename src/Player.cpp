@@ -283,8 +283,21 @@ void Player::updateShooting(float deltaTime, const sf::RenderWindow& window, std
 	bullets.erase(std::remove_if(bullets.begin(), bullets.end(), [](const Bullet& b) { return b.getIsMarkedForDeletion(); }), bullets.end());
 
 	// Update bullets and detect collisions with enemies
-	for (auto& bullet : bullets)
+	//for (auto& bullet : bullets)
+	for (auto it = bullets.begin(); it != bullets.end(); ++it)
 	{
+		Bullet& bullet = *it;
+
+		// Check if the bullet is marked for deletion and remove it
+		if (bullet.getIsMarkedForDeletion())
+		{
+			it = bullets.erase(it);
+			if (it == bullets.end())
+				break;
+			continue; // Skip the rest of the loop if the bullet is marked for deletion
+		}
+
+		// Update bullet position and check for collisions with enemies
 		bullet.update(deltaTime, window);
 		for (auto& enemy : enemies)
 		{
