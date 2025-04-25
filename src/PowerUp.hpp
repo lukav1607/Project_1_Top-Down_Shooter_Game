@@ -10,10 +10,10 @@ public:
 		DAMAGE,
 		FIRE_RATE,
 		SPEED,
-		HEALTH
+		LIFE
 	};
 
-	PowerUp(const sf::Vector2u& windowSize);
+	PowerUp(const sf::Vector2u& windowSize, int playerLivesCurrent, unsigned playerLivesMax);
 
 	void activate();
 	void update(float deltaTime);

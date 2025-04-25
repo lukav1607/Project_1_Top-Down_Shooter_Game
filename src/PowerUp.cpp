@@ -3,7 +3,7 @@
 
 using namespace Utility;
 
-PowerUp::PowerUp(const sf::Vector2u& windowSize) :
+PowerUp::PowerUp(const sf::Vector2u& windowSize, int playerLivesCurrent, unsigned playerLivesMax) :
 	rotationSpeed(10.f),
 	scaleCurrent(1.f),
 	scalePrevious(1.f),
@@ -30,6 +30,14 @@ PowerUp::PowerUp(const sf::Vector2u& windowSize) :
 	);
 
 	int randomType = getRandomNumber(0, 4);
+
+	// Ensure that the life power-up does not spawn if the player has max lives
+	if (playerLivesCurrent >= playerLivesMax)
+	{
+		while (randomType == 3)
+			randomType = getRandomNumber(0, 4);
+	}
+
 	switch (randomType)
 	{
 	case 0:
@@ -45,7 +53,7 @@ PowerUp::PowerUp(const sf::Vector2u& windowSize) :
 		shape.setFillColor(sf::Color(122, 204, 242));
 		break;
 	case 3:
-		type = Type::HEALTH;
+		type = Type::LIFE;
 		shape.setFillColor(sf::Color(242, 138, 154));
 		break;
 	}
@@ -71,7 +79,7 @@ void PowerUp::update(float deltaTime)
 	}
 	else
 	{
-		if (timer >= buffDuration || type == Type::HEALTH)
+		if (timer >= buffDuration || type == Type::LIFE)
 			needsDeleting = true;
 	}
 }

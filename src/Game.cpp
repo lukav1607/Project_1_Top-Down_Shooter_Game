@@ -62,9 +62,9 @@ Game::Game() :
 	window.setVerticalSyncEnabled(true);
 
 	// Enemy spawn parameters
-	enemySpawnParams.intervalMin = sf::seconds(0.5f);
+	enemySpawnParams.intervalMin = sf::seconds(0.75f);
 	enemySpawnParams.intervalMax = sf::seconds(1.25f);
-	enemySpawnParams.rampUpTime = sf::seconds(120.f);
+	enemySpawnParams.rampUpTime = sf::seconds(180.f);
 	enemySpawnParams.intervalCurrent = enemySpawnParams.intervalMax;
 	enemySpawnParams.timeSinceLastSpawn = sf::seconds(0.f);
 
@@ -244,7 +244,7 @@ void Game::processSpawns()
 	powerupSpawnParams.timeSinceLastSpawn += sf::seconds(TIMESTEP);
 	if (powerupSpawnParams.timeSinceLastSpawn >= powerupSpawnParams.intervalCurrent)
 	{
-		powerups.emplace_back(std::make_shared<PowerUp>(window.getSize()));
+		powerups.emplace_back(std::make_shared<PowerUp>(window.getSize(), player.getLivesCurrent(), player.getLivesMax()));
 		powerupSpawnParams.timeSinceLastSpawn = sf::seconds(0.f);
 
 		// Smoothly transition intervalCurrent from max to min linearly

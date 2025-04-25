@@ -175,8 +175,8 @@ void Player::managePowerUpExpiration()
 				currentStats.acceleration = DEFAULT_STATS.acceleration;
 				std::cout << "Speed power-up expired!" << std::endl;
 				break;
-			case PowerUp::Type::HEALTH:
-				break; // Health power-ups don't expire
+			case PowerUp::Type::LIFE:
+				break; // Life power-ups don't expire
 			}
 
 			// Remove the power-up from the activePowerUps vector
@@ -220,10 +220,10 @@ void Player::applyPowerUp(std::shared_ptr<PowerUp> powerUp)
 		std::cout << "Speed power-up applied!" << std::endl;
 		break;
 
-	case PowerUp::Type::HEALTH:
+	case PowerUp::Type::LIFE:
 		if (livesCurrent < livesMax)
 			livesCurrent += 1;
-		std::cout << "Health power-up applied!" << std::endl;
+		std::cout << "Life power-up applied!" << std::endl;
 		break;
 	}
 }
