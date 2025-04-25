@@ -42,21 +42,25 @@ PowerUp::PowerUp(const sf::Vector2u& windowSize, int playerLivesCurrent, unsigne
 		type = Type::DAMAGE;
 		color = sf::Color(242, 76, 107);
 		shape.setFillColor(color);
+		name = "Damage";
 		break;
 	case 1:
 		type = Type::FIRE_RATE;
 		color = sf::Color(92, 229, 138);
 		shape.setFillColor(color);
+		name = "Fire Rate";
 		break;
 	case 2:
 		type = Type::SPEED;
 		color = sf::Color(122, 204, 242);
 		shape.setFillColor(color);
+		name = "Speed";
 		break;
 	case 3:
 		type = Type::LIFE;
 		color = sf::Color(242, 138, 154);
 		shape.setFillColor(color);
+		name = "Life";
 		break;
 	}
 }

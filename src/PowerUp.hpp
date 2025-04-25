@@ -22,6 +22,7 @@ public:
 	inline bool getIsPickedUp() const { return isPickedUp; }
 	inline bool getNeedsDeleting() const { return needsDeleting; }
 	inline Type getType() const { return type; }
+	inline const std::string& getName() const { return name; }
 	inline sf::Time getTimeLeft() const { return buffDuration - timer; }
 	inline sf::Vector2f getPosition() const { return shape.getPosition(); }
 	inline float getCollisionRadius() const { return collisionRadius; }
@@ -46,6 +47,7 @@ private:
 	bool needsDeleting;
 
 	Type type;
+	std::string name;
 	sf::Time buffDuration;
 	sf::Time despawnTime;
 	sf::Time timer;

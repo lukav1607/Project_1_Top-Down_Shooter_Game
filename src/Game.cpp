@@ -169,7 +169,7 @@ void Game::update()
 
 			player.update(TIMESTEP, window, enemies);
 
-			hud.update(window, player.getLivesCurrent(), player.getLivesMax(), player.score);
+			hud.update(window, player.getLivesCurrent(), player.getLivesMax(), player.score, player.getActivePowerUp());
 
 			// Remove dead enemies
 			enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const Enemy& e) { return e.getNeedsDeleting(); }), enemies.end());

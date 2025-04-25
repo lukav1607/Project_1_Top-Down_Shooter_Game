@@ -22,6 +22,7 @@ public:
 	void loseLife(unsigned amount = 1);
 	void applyPowerUp(std::shared_ptr<PowerUp> powerUp);
 
+	inline const std::shared_ptr<PowerUp>& getActivePowerUp() const { return activePowerUp; }
 	inline int getLivesCurrent() const { return livesCurrent; }
 	inline unsigned getLivesMax() const { return livesMax; }
 	inline sf::Vector2f getPosition() const { return positionCurrent; }
@@ -79,5 +80,5 @@ private:
 	BuffableStats currentStats;
 	BuffableStats buffedStats;
 
-	std::vector<std::shared_ptr<PowerUp>> activePowerUps;
+	std::shared_ptr<PowerUp> activePowerUp;
 };

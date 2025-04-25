@@ -152,13 +152,13 @@ void Player::launchBullet()
 
 void Player::managePowerUpExpiration()
 {
-	for (auto it = activePowerUps.begin(); it != activePowerUps.end(); ++it)
-	{
+	//for (auto it = activePowerUps.begin(); it != activePowerUps.end(); ++it)
+	//{
 		// Remove expired power-ups
-		if ((*it)->getNeedsDeleting())
+		if (activePowerUp != nullptr && /*(*it)->getNeedsDeleting()*/activePowerUp->getNeedsDeleting())
 		{
 			// Reset the player's stats based on the power-up type
-			switch ((*it)->getType())
+			switch (/*(*it)->getType()*/activePowerUp->getType())
 			{
 			case PowerUp::Type::DAMAGE:
 				currentStats.bulletDamage = DEFAULT_STATS.bulletDamage;
@@ -179,11 +179,12 @@ void Player::managePowerUpExpiration()
 				break; // Life power-ups don't expire
 			}
 
+			activePowerUp = nullptr;
 			// Remove the power-up from the activePowerUps vector
-			it = activePowerUps.erase(it);
-			if (it == activePowerUps.end()) 
-				break;
-		}
+			//it = activePowerUps.erase(it);
+			//if (it == activePowerUps.end()) 
+			//	break;
+		//}
 	}
 }
 
@@ -198,9 +199,9 @@ void Player::loseLife(unsigned amount)
 
 void Player::applyPowerUp(std::shared_ptr<PowerUp> powerUp)
 {
-	activePowerUps.push_back(powerUp);
+	activePowerUp = powerUp;
 
-	switch (activePowerUps.back()->getType())
+	switch (activePowerUp->getType())
 	{
 	case PowerUp::Type::DAMAGE:
 		currentStats.bulletDamage = buffedStats.bulletDamage;
