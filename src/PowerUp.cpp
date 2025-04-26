@@ -13,7 +13,7 @@ PowerUp::PowerUp(const sf::Vector2u& windowSize, int playerLivesCurrent, unsigne
 	scaleSpeed(3.f),
 	shapeSize(40.f),
 	collisionRadius(shapeSize / 2.f),
-	isPickedUp(false),
+	isActivated(false),
 	needsDeleting(false),
 	buffDuration(sf::seconds(8.f)),
 	despawnTime(sf::seconds(8.f)),
@@ -69,7 +69,7 @@ PowerUp::PowerUp(const sf::Vector2u& windowSize, int playerLivesCurrent, unsigne
 
 void PowerUp::activate()
 {
-	isPickedUp = true;
+	isActivated = true;
 	timer = sf::seconds(0.f);
 }
 
@@ -77,7 +77,7 @@ void PowerUp::update(float deltaTime)
 {
 	timer += sf::seconds(deltaTime);
 
-	if (!isPickedUp)
+	if (!isActivated)
 	{
 		scalePrevious = scaleCurrent;
 		scaleCurrent = std::sin(pulseClock.getElapsedTime().asSeconds() * scaleSpeed) * scaleAmplitude + 1.f;
@@ -111,7 +111,7 @@ void PowerUp::update(float deltaTime)
 
 void PowerUp::render(float alpha, sf::RenderWindow& window, bool isDebugModeOn)
 {
-	if (!isPickedUp)
+	if (!isActivated)
 	{
 		shape.setScale({ interpolate(scalePrevious, scaleCurrent, alpha), interpolate(scalePrevious, scaleCurrent, alpha) });
 

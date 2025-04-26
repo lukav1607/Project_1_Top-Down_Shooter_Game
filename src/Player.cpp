@@ -269,6 +269,9 @@ void Player::updateRotation(float deltaTime, const sf::RenderWindow& window)
 
 void Player::updateShooting(float deltaTime, const sf::RenderWindow& window, std::vector<Enemy>& enemies)
 {
+	// Track when a bullet (any) has hit an enemy
+	timeSinceLastHit += sf::seconds(deltaTime);
+
 	// Shooting Logic
 	timeSinceLastShot += sf::seconds(deltaTime);
 	if (isShooting && timeSinceLastShot >= currentStats.fireRate)
@@ -297,6 +300,8 @@ void Player::updateShooting(float deltaTime, const sf::RenderWindow& window, std
 		{
 			if (doesCircleIntersectCircle(bullet.getPosition(), bullet.getCollisionRadius(), enemy.getPosition(), enemy.getCollisionRadius()))
 			{
+				timeSinceLastHit = sf::seconds(0.f); // Reset the hit timer
+
 				sf::Vector2f normal = normalize(bullet.getPosition() - enemy.getPosition());
 				sf::Vector2f bulletDirection = normalize(bullet.getVelocity());
 				sf::Vector2f reflection = bulletDirection - 2.f * dot(bulletDirection, normal) * normal;

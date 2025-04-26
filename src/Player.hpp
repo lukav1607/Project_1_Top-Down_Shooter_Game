@@ -10,6 +10,7 @@
 #include "PowerUp.hpp"
 #include "ParticleSystem.hpp"
 
+
 class Player
 {
 public:
@@ -30,6 +31,8 @@ public:
 	inline float getCollisionRadius() const { return collisionRadius; }
 
 	inline bool isInvincible() const { return iFramesTimer > sf::seconds(0.f); }
+	inline bool wasBulletJustFired() const { return timeSinceLastShot <= sf::seconds(0.f); }
+	inline bool hasBulletJustHit() const { return timeSinceLastHit <= sf::seconds(0.f); }
 
 	int score;
 
@@ -67,6 +70,7 @@ private:
 	sf::Color bulletColor = sf::Color(255, 230, 100);
 	bool isShooting;
 	sf::Time timeSinceLastShot;
+	sf::Time timeSinceLastHit;
 
 	ParticleSystem particleSystem;
 

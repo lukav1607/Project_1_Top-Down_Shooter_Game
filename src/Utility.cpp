@@ -53,6 +53,17 @@ int Utility::getRandomNumber(int min, int max)
 	return dist(gen);
 }
 
+// Example use: variationPercent 0.15f == 15% variation
+float Utility::randomPitch(float variationPercent)
+{
+	static std::random_device rd;
+	static std::mt19937 gen(rd());
+	static std::uniform_real_distribution<float> dist(-0.5f, 0.5f);
+
+	float randomFactor = dist(gen);
+	return 1.0f + randomFactor * 2.0f * variationPercent;
+}
+
 bool Utility::doesCircleIntersectRectangle(sf::Vector2f circleCenter, float circleRadius, sf::FloatRect rectangle)
 {
 	// Find the closest point to the circle within the rectangle

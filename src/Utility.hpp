@@ -20,6 +20,8 @@ namespace Utility
 	float getRandomNumber(float min, float max);
 	int getRandomNumber(int min, int max);
 
+	float randomPitch(float variationPercent);
+
 	bool doesCircleIntersectRectangle(sf::Vector2f circleCenter, float circleRadius, sf::FloatRect rectangle);
 	bool doesCircleIntersectCircle(sf::Vector2f circleCenter1, float circleRadius1, sf::Vector2f circleCenter2, float circleRadius2);
 

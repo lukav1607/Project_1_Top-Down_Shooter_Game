@@ -62,7 +62,10 @@ Game::Game() :
 	auto settings = sf::ContextSettings();
 	settings.antiAliasingLevel = 8;
 	window = sf::RenderWindow(sf::VideoMode(WINDOW_SIZE), "Top-down Shooter", sf::State::Windowed, settings);
-	window.setVerticalSyncEnabled(true);
+	window.setVerticalSyncEnabled(true); 
+
+	std::cout << "Audio device count: " << sf::PlaybackDevice::getAvailableDevices().size() << std::endl;
+	std::cout << "Default audio device: " << sf::PlaybackDevice::getDefaultDevice().value() << std::endl;
 
 	// Enemy spawn parameters
 	enemySpawnParams.intervalMin = sf::seconds(0.75f);
@@ -80,6 +83,9 @@ Game::Game() :
 
 	// Seed the random number generator
 	std::srand(static_cast<unsigned>(std::time(nullptr)));
+
+	soundManager.loadSounds();
+	soundManager.volume = 50.f;
 
 	logicClock.stop();
 	gameClock.stop();
@@ -140,6 +146,7 @@ void Game::update()
 	// Playing state
 	else if (gameState == GameState::PLAYING)
 	{
+		static int updateCount = 0;
 		float frameTime = logicClock.restart().asSeconds();
 		accumulator += frameTime;
 
@@ -154,6 +161,7 @@ void Game::update()
 				// Update powerups and check for pickup by player
 				powerups.at(it - powerups.begin())->update(TIMESTEP);
 				processCollisionsWithPlayer(*it);
+
 
 				// Remove expired powerups
 				if ((*it)->getNeedsDeleting())
@@ -171,25 +179,40 @@ void Game::update()
 			}
 
 			player.update(TIMESTEP, window, enemies);
+			if (player.wasBulletJustFired())
+				soundManager.playSound(SoundManager::SoundID::PLAYER_SHOOT, 0.15f);
+			if (player.hasBulletJustHit())
+				soundManager.playSound(SoundManager::SoundID::ENEMY_HIT, 0.1f);
 
 			hud.update(window, player.getLivesCurrent(), player.getLivesMax(), player.score, player.getActivePowerUp());
 
 			// Remove dead enemies
+			unsigned enemyCount = enemies.size();
 			enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const Enemy& e) { return e.getNeedsDeleting(); }), enemies.end());
+			if (enemies.size() < enemyCount)
+				soundManager.playSound(SoundManager::SoundID::ENEMY_DEATH, 0.1f);
 
 			// On player death
 			if (player.getLivesCurrent() <= 0)
 			{
 				gameState = GameState::GAME_OVER;
+				soundManager.playSound(SoundManager::SoundID::GAME_OVER);
+
 				text.score.setString("Score: " + std::to_string(player.score));
 				text.score.setOrigin({ text.score.getGlobalBounds().size.x / 2.f, text.score.getGlobalBounds().size.y / 2.f });
 				text.score.setPosition({ window.getSize().x / 2.f, window.getSize().y / 2.f - 20.f });
+
 				break;
 			}
 
 			accumulator -= TIMESTEP;
 		}
 		float alpha = accumulator / TIMESTEP;
+
+		if (updateCount % 60 == 0) {
+			soundManager.cleanupSounds();
+		}
+		updateCount++;
 	}
 }
 
@@ -254,6 +277,8 @@ void Game::processSpawns()
 		// After rampUpTime seconds, it will be at intervalMin
 		float t = std::min(gameClock.getElapsedTime().asSeconds() / powerupSpawnParams.rampUpTime.asSeconds(), 1.f);
 		powerupSpawnParams.intervalCurrent = powerupSpawnParams.intervalMax - (powerupSpawnParams.intervalMax - powerupSpawnParams.intervalMin) * t;
+
+		soundManager.playSound(SoundManager::SoundID::POWERUP_SPAWN, 0.05f);
 	}
 }
 
@@ -265,15 +290,17 @@ void Game::processCollisionsWithPlayer(Enemy& enemy)
 		player.loseLife();
 		enemy.decreaseHealthBy(enemy.getHealth());
 		enemy.scoreValue = 0;
+		soundManager.playSound(SoundManager::SoundID::PLAYER_HIT);
 	}
 }
 
 void Game::processCollisionsWithPlayer(std::shared_ptr<PowerUp> powerUp)
 {
 	if (doesCircleIntersectCircle(player.getPosition(), player.getCollisionRadius(), powerUp->getPosition(), powerUp->getCollisionRadius())
-		&& !powerUp->getIsPickedUp())
+		&& !powerUp->getIsActivated())
 	{
 		powerUp->activate();
 		player.applyPowerUp(powerUp);
+		soundManager.playSound(SoundManager::SoundID::POWERUP_PICKUP);
 	}
 }

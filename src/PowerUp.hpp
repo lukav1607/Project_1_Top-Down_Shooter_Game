@@ -19,7 +19,8 @@ public:
 	void update(float deltaTime);
 	void render(float alpha, sf::RenderWindow& window, bool isDebugModeOn);
 
-	inline bool getIsPickedUp() const { return isPickedUp; }
+	inline bool getIsActivated() const { return isActivated; }
+
 	inline bool getNeedsDeleting() const { return needsDeleting; }
 	inline Type getType() const { return type; }
 	inline const std::string& getName() const { return name; }
@@ -43,7 +44,7 @@ private:
 	float scaleAmplitude;
 	float scaleSpeed;
 
-	bool isPickedUp;
+	bool isActivated;
 	bool needsDeleting;
 
 	Type type;
