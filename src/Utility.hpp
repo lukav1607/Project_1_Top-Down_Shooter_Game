@@ -7,6 +7,9 @@ namespace Utility
 	// Normalize a vector to have a magnitude of 1 (used for direction calculations)
 	sf::Vector2f normalize(const sf::Vector2f& vector);
 
+	// Calculate dot product of two vectors
+	float dot(const sf::Vector2f& a, const sf::Vector2f& b);
+
 	// Interpolate between two floats
 	float interpolate(float previous, float current, float alpha);
 	// Interpolate between two points

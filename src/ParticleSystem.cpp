@@ -5,31 +5,44 @@
 
 using namespace Utility;
 
-ParticleSystem::ParticleSystem()
+ParticleSystem::ParticleSystem() :
+	spreadAngle(sf::degrees(60.f))
 {
 	particles.reserve(100);
 }
 
-void ParticleSystem::spawnNew(sf::Vector2f position, unsigned count)
+void ParticleSystem::spawnNew(sf::Vector2f position, sf::Vector2f direction, sf::Color color, unsigned count)
 {
 	static std::mt19937 gen(std::random_device{}());
-	static std::uniform_real_distribution<float> angleDist(0.f, 2.f * 3.14159f);
-	static std::uniform_real_distribution<float> speedDist(50.f, 150.f);
+	//static std::uniform_real_distribution<float> angleDist(0.f, 2.f * 3.14159f);
+	static std::uniform_real_distribution<float> offsetDist(-0.5f, 0.5f);
+	static std::uniform_real_distribution<float> speedDist(150.f, 300.f);
 
 	for (unsigned i = 0; i < count; ++i)
 	{
-		float angle = angleDist(gen);
 		float speed = speedDist(gen);
+		float size = getRandomNumber(sizeMin, sizeMax);
+
+		//float angle = angleDist(gen);
+		float angleOffset = offsetDist(gen) * spreadAngle.asRadians();
+		float cosA = std::cos(angleOffset);
+		float sinA = std::sin(angleOffset);
+
+		sf::Vector2f finalDirection(
+			direction.x * cosA - direction.y * sinA,
+			direction.x * sinA + direction.y * cosA);
 
 		Particle particle;
 		particle.positionCurrent = position;
 		particle.positionPrevious = position;
-		particle.velocity = { speed * std::cos(angle), speed * std::sin(angle) };
+		particle.velocity = { speed * finalDirection.x, speed * finalDirection.y };
 		particle.lifetime = LIFETIME_MAX;
-		particle.shape.setSize({ 4.f, 4.f });
-		particle.shape.setFillColor(sf::Color::White);
+		particle.startColor = sf::Color::White;
+		particle.endColor = color;
+		particle.shape.setFillColor(particle.startColor);
+		particle.shape.setSize({ size, size });
 		particle.shape.setOrigin(particle.shape.getSize() / 2.f);
-		particle.shape.setRotation(sf::radians(angle));
+		particle.shape.setRotation(sf::radians(getRandomNumber(0.f, 360.f)));
 		particle.shape.setPosition(position);
 
 		particles.push_back(particle);
@@ -41,17 +54,26 @@ void ParticleSystem::update(float deltaTime)
 	for (auto& particle : particles)
 	{
 		particle.lifetime -= sf::seconds(deltaTime);
+
+		particle.velocity *= 0.95f; // Damping effect
 		particle.positionPrevious = particle.positionCurrent;
 		particle.positionCurrent += particle.velocity * deltaTime;
-		sf::Color color = particle.shape.getFillColor();
-		color.a = static_cast<std::uint8_t>(255 * (particle.lifetime.asSeconds() / LIFETIME_MAX.asSeconds()));
-		particle.shape.setFillColor(color);
 
-		// Remove dead particles
-		particles.erase(std::remove_if(particles.begin(), particles.end(),
-			[](const Particle& p) { return p.lifetime <= sf::seconds(0.f); }),
-			particles.end());
+		float lifetimeProgress = 1.f - (particle.lifetime.asSeconds() / LIFETIME_MAX.asSeconds());
+		lifetimeProgress = std::clamp(lifetimeProgress, 0.f, 1.f);
+
+		std::uint8_t r = static_cast<std::uint8_t>(particle.startColor.r + (particle.endColor.r - particle.startColor.r) * lifetimeProgress);
+		std::uint8_t g = static_cast<std::uint8_t>(particle.startColor.g + (particle.endColor.g - particle.startColor.g) * lifetimeProgress);
+		std::uint8_t b = static_cast<std::uint8_t>(particle.startColor.b + (particle.endColor.b - particle.startColor.b) * lifetimeProgress);
+		std::uint8_t a = static_cast<std::uint8_t>(255 * (particle.lifetime.asSeconds() / LIFETIME_MAX.asSeconds()));
+
+		particle.shape.setFillColor(sf::Color(r, g, b, a));
 	}
+
+	// Remove dead particles
+	particles.erase(std::remove_if(particles.begin(), particles.end(),
+		[](const Particle& p) { return p.lifetime <= sf::seconds(0.f); }),
+		particles.end());
 }
 
 void ParticleSystem::render(float alpha, sf::RenderWindow& window, bool isDebugModeOn)

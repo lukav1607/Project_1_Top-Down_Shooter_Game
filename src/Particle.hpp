@@ -9,4 +9,6 @@ struct Particle
 	sf::Vector2f velocity;
 	sf::Time lifetime;
 	sf::RectangleShape shape;
+	sf::Color endColor;
+	sf::Color startColor;
 };

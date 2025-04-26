@@ -21,6 +21,7 @@ public:
 	inline float getCollisionRadius() const { return collisionRadius; }
 	inline sf::Vector2f getPosition() const { return positionCurrent; }
 	inline sf::FloatRect getGlobalBounds() const { return shape.getGlobalBounds(); }
+	inline sf::Color getColor() const { return shape.getFillColor(); }
 
 	int scoreValue;
 

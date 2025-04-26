@@ -17,6 +17,11 @@ sf::Vector2f Utility::normalize(const sf::Vector2f& vector)
 		return { 0.f, 0.f };
 }
 
+float Utility::dot(const sf::Vector2f& a, const sf::Vector2f& b)
+{
+	return a.x * b.x + a.y * b.y;
+}
+
 float Utility::interpolate(float previous, float current, float alpha)
 {
 	return previous * (1.f - alpha) + current * alpha;

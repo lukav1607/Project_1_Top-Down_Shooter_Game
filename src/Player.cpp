@@ -155,39 +155,31 @@ void Player::launchBullet()
 
 void Player::managePowerUpExpiration()
 {
-	//for (auto it = activePowerUps.begin(); it != activePowerUps.end(); ++it)
-	//{
-		// Remove expired power-ups
-		if (activePowerUp != nullptr && /*(*it)->getNeedsDeleting()*/activePowerUp->getNeedsDeleting())
+	// Remove expired power-ups
+	if (activePowerUp != nullptr && activePowerUp->getNeedsDeleting())
+	{
+		// Reset the player's stats based on the power-up type
+		switch (activePowerUp->getType())
 		{
-			// Reset the player's stats based on the power-up type
-			switch (/*(*it)->getType()*/activePowerUp->getType())
-			{
-			case PowerUp::Type::DAMAGE:
-				currentStats.bulletDamage = DEFAULT_STATS.bulletDamage;
-				currentStats.bulletSizeMultiplier = DEFAULT_STATS.bulletSizeMultiplier;
-				currentStats.bulletSpeedMultiplier = DEFAULT_STATS.bulletSpeedMultiplier;
-				std::cout << "Damage power-up expired!" << std::endl;
-				break;
-			case PowerUp::Type::FIRE_RATE:
-				currentStats.fireRate = DEFAULT_STATS.fireRate;
-				std::cout << "Fire rate power-up expired!" << std::endl;
-				break;
-			case PowerUp::Type::SPEED:
-				currentStats.maxSpeed = DEFAULT_STATS.maxSpeed;
-				currentStats.acceleration = DEFAULT_STATS.acceleration;
-				std::cout << "Speed power-up expired!" << std::endl;
-				break;
-			case PowerUp::Type::LIFE:
-				break; // Life power-ups don't expire
-			}
-
-			activePowerUp = nullptr;
-			// Remove the power-up from the activePowerUps vector
-			//it = activePowerUps.erase(it);
-			//if (it == activePowerUps.end()) 
-			//	break;
-		//}
+		case PowerUp::Type::DAMAGE:
+			currentStats.bulletDamage = DEFAULT_STATS.bulletDamage;
+			currentStats.bulletSizeMultiplier = DEFAULT_STATS.bulletSizeMultiplier;
+			currentStats.bulletSpeedMultiplier = DEFAULT_STATS.bulletSpeedMultiplier;
+			//std::cout << "Damage power-up expired!" << std::endl;
+			break;
+		case PowerUp::Type::FIRE_RATE:
+			currentStats.fireRate = DEFAULT_STATS.fireRate;
+			//std::cout << "Fire rate power-up expired!" << std::endl;
+			break;
+		case PowerUp::Type::SPEED:
+			currentStats.maxSpeed = DEFAULT_STATS.maxSpeed;
+			currentStats.acceleration = DEFAULT_STATS.acceleration;
+			//std::cout << "Speed power-up expired!" << std::endl;
+			break;
+		case PowerUp::Type::LIFE:
+			break; // Life power-ups don't expire
+		}
+		activePowerUp = nullptr;
 	}
 }
 
@@ -210,24 +202,24 @@ void Player::applyPowerUp(std::shared_ptr<PowerUp> powerUp)
 		currentStats.bulletDamage = buffedStats.bulletDamage;
 		currentStats.bulletSizeMultiplier = buffedStats.bulletSizeMultiplier;
 		currentStats.bulletSpeedMultiplier = buffedStats.bulletSpeedMultiplier;
-		std::cout << "Damage power-up applied!" << std::endl;
+		//std::cout << "Damage power-up applied!" << std::endl;
 		break;
 
 	case PowerUp::Type::FIRE_RATE:
 		currentStats.fireRate = buffedStats.fireRate;
-		std::cout << "Fire rate power-up applied!" << std::endl;
+		//std::cout << "Fire rate power-up applied!" << std::endl;
 		break;
 
 	case PowerUp::Type::SPEED:
 		currentStats.maxSpeed = buffedStats.maxSpeed;
 		currentStats.acceleration = buffedStats.acceleration;
-		std::cout << "Speed power-up applied!" << std::endl;
+		//std::cout << "Speed power-up applied!" << std::endl;
 		break;
 
 	case PowerUp::Type::LIFE:
 		if (livesCurrent < livesMax)
 			livesCurrent += 1;
-		std::cout << "Life power-up applied!" << std::endl;
+		//std::cout << "Life power-up applied!" << std::endl;
 		break;
 	}
 }
@@ -286,7 +278,6 @@ void Player::updateShooting(float deltaTime, const sf::RenderWindow& window, std
 	//bullets.erase(std::remove_if(bullets.begin(), bullets.end(), [](const Bullet& b) { return b.getIsMarkedForDeletion(); }), bullets.end());
 
 	// Update bullets and detect collisions with enemies
-	//for (auto& bullet : bullets)
 	for (auto it = bullets.begin(); it != bullets.end(); ++it)
 	{
 		Bullet& bullet = *it;
@@ -306,9 +297,14 @@ void Player::updateShooting(float deltaTime, const sf::RenderWindow& window, std
 		{
 			if (doesCircleIntersectCircle(bullet.getPosition(), bullet.getCollisionRadius(), enemy.getPosition(), enemy.getCollisionRadius()))
 			{
-				enemy.decreaseHealthBy(bullet.getDamage());
-				particleSystem.spawnNew(bullet.getPosition(), 8);
+				sf::Vector2f normal = normalize(bullet.getPosition() - enemy.getPosition());
+				sf::Vector2f bulletDirection = normalize(bullet.getVelocity());
+				sf::Vector2f reflection = bulletDirection - 2.f * dot(bulletDirection, normal) * normal;
+				particleSystem.spawnNew(bullet.getPosition(), reflection, enemy.getColor(), 8);
+
 				bullet.markForDeletion();
+				enemy.decreaseHealthBy(bullet.getDamage());
+
 				break; // Exit the loop after a hit to avoid multiple hits with the same bullet
 			}
 		}

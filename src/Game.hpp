@@ -37,7 +37,7 @@ private:
 	sf::Clock logicClock;
 	sf::Clock gameClock;
 
-	const float UPS = 60.f; // Updates per second
+	const float UPS = 30.f; // Updates per second
 	const float TIMESTEP = 1.f / UPS;
 	float accumulator; // Time accumulator for fixed timestep
 	float alpha; // Interpolation factor for rendering
