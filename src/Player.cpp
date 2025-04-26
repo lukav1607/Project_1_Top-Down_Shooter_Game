@@ -97,6 +97,7 @@ void Player::update(float deltaTime, const sf::RenderWindow& window, std::vector
 	updateShooting(deltaTime, window, enemies);
 	keepWithinWindow(window);
 	managePowerUpExpiration();
+	particleSystem.update(deltaTime);
 
 	if (livesCurrent <= 0)
 		livesCurrent = 0;
@@ -126,6 +127,8 @@ void Player::render(float alpha, sf::RenderWindow& window, bool isDebugModeOn)
 	}
 
 	window.draw(shape);
+
+	particleSystem.render(alpha, window, isDebugModeOn);
 
 	if (isDebugModeOn)
 	{
@@ -304,6 +307,7 @@ void Player::updateShooting(float deltaTime, const sf::RenderWindow& window, std
 			if (doesCircleIntersectCircle(bullet.getPosition(), bullet.getCollisionRadius(), enemy.getPosition(), enemy.getCollisionRadius()))
 			{
 				enemy.decreaseHealthBy(bullet.getDamage());
+				particleSystem.spawnNew(bullet.getPosition(), 8);
 				bullet.markForDeletion();
 				break; // Exit the loop after a hit to avoid multiple hits with the same bullet
 			}

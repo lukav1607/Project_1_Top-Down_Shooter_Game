@@ -2,6 +2,7 @@
 #include "Utility.hpp"
 
 #include <iostream>
+#include <cmath>
 
 using Utility::interpolate;
 

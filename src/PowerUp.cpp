@@ -1,6 +1,8 @@
 #include "PowerUp.hpp"
 #include "Utility.hpp"
 
+#include <cmath>
+
 using namespace Utility;
 
 PowerUp::PowerUp(const sf::Vector2u& windowSize, int playerLivesCurrent, unsigned playerLivesMax) :

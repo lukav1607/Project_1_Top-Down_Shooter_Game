@@ -3,6 +3,7 @@
 #include <SFML/System.hpp>
 #include <map>
 #include <random>
+#include <cmath>
 
 sf::Vector2f Utility::normalize(const sf::Vector2f& vector)
 {

@@ -2,6 +2,7 @@
 #include "Utility.hpp"
 
 #include <iostream>
+#include <cmath>
 
 using namespace Utility;
 
@@ -53,8 +54,10 @@ Game::Game() :
 	// Entities
 	player(WINDOW_SIZE),
 	hud(font, window),
-	maxEnemies(50U)
+	maxEnemies(25U)
 {
+	enemies.reserve(maxEnemies);
+
 	// Set up the window
 	auto settings = sf::ContextSettings();
 	settings.antiAliasingLevel = 8;

@@ -8,6 +8,7 @@
 #include "Bullet.hpp"
 #include "Enemy.hpp"
 #include "PowerUp.hpp"
+#include "ParticleSystem.hpp"
 
 class Player
 {
@@ -66,6 +67,8 @@ private:
 	sf::Color bulletColor = sf::Color(255, 230, 100);
 	bool isShooting;
 	sf::Time timeSinceLastShot;
+
+	ParticleSystem particleSystem;
 
 	struct BuffableStats
 	{
