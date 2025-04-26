@@ -14,6 +14,8 @@ public:
 	void update(float deltaTime);
 	void render(float alpha, sf::RenderWindow& window, bool isDebugModeOn);
 
+	inline void clear() { particles.clear(); }
+
 private:
 	std::vector<Particle> particles;
 

@@ -29,7 +29,9 @@ Player::Player(sf::Vector2u windowSize) :
 	iFramesTimer(sf::seconds(0.f)),
 	// Shooting
 	isShooting(false),
-	timeSinceLastShot(sf::seconds(0.f))
+	timeSinceLastShot(sf::seconds(0.f)),
+	//
+	hasPowerUpJustExpired(false)
 {
 	// Initialize the shape
 	shape.setPointCount(3);
@@ -64,6 +66,7 @@ void Player::reset(sf::Vector2u windowSize)
 	livesCurrent = livesMax;
 	iFramesTimer = sf::seconds(0.f);
 	bullets.clear();
+	particleSystem.clear();
 	score = 0;
 }
 
@@ -155,9 +158,13 @@ void Player::launchBullet()
 
 void Player::managePowerUpExpiration()
 {
+	hasPowerUpJustExpired = false;
+
 	// Remove expired power-ups
 	if (activePowerUp != nullptr && activePowerUp->getNeedsDeleting())
 	{
+		hasPowerUpJustExpired = true;
+
 		// Reset the player's stats based on the power-up type
 		switch (activePowerUp->getType())
 		{

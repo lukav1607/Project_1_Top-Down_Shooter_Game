@@ -13,7 +13,8 @@ public:
 		ENEMY_HIT,
 		ENEMY_DEATH,
 		POWERUP_SPAWN,
-		POWERUP_PICKUP,
+		POWERUP_ACTIVATE,
+		POWERUP_EXPIRE,
 		GAME_OVER
 	};
 
@@ -22,8 +23,9 @@ public:
 	// Remove any sounds that are no longer playing
 	void cleanupSounds();
 
-	// Play a sound with a random pitch variation. Note: pitchVariancePercentage 0.15f == +/- 15% variation
-	void playSound(SoundID soundID, float pitchVariancePercentage = 0.f);
+	// Play a sound at specified volume with a random pitch variation.
+	// Note: pitchVariancePercentage 0.15f == +/- 15% variation
+	void playSound(SoundID soundID, float volumeMultiplier = 1.f, float pitchVariancePercentage = 0.f);
 
 	float volume = 100.f;
 

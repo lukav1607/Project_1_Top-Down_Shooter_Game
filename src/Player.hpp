@@ -33,6 +33,7 @@ public:
 	inline bool isInvincible() const { return iFramesTimer > sf::seconds(0.f); }
 	inline bool wasBulletJustFired() const { return timeSinceLastShot <= sf::seconds(0.f); }
 	inline bool hasBulletJustHit() const { return timeSinceLastHit <= sf::seconds(0.f); }
+	inline bool getHasPowerUpJustExpired() const { return hasPowerUpJustExpired; }
 
 	int score;
 
@@ -88,4 +89,5 @@ private:
 	BuffableStats buffedStats;
 
 	std::shared_ptr<PowerUp> activePowerUp;
+	bool hasPowerUpJustExpired;
 };

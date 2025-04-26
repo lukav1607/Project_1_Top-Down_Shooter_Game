@@ -180,9 +180,11 @@ void Game::update()
 
 			player.update(TIMESTEP, window, enemies);
 			if (player.wasBulletJustFired())
-				soundManager.playSound(SoundManager::SoundID::PLAYER_SHOOT, 0.15f);
+				soundManager.playSound(SoundManager::SoundID::PLAYER_SHOOT, 1.f, 0.15f);
 			if (player.hasBulletJustHit())
-				soundManager.playSound(SoundManager::SoundID::ENEMY_HIT, 0.1f);
+				soundManager.playSound(SoundManager::SoundID::ENEMY_HIT, 0.5f, 0.1f);
+			if (player.getHasPowerUpJustExpired())
+				soundManager.playSound(SoundManager::SoundID::POWERUP_EXPIRE, 2.f);
 
 			hud.update(window, player.getLivesCurrent(), player.getLivesMax(), player.score, player.getActivePowerUp());
 
@@ -190,7 +192,7 @@ void Game::update()
 			unsigned enemyCount = enemies.size();
 			enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const Enemy& e) { return e.getNeedsDeleting(); }), enemies.end());
 			if (enemies.size() < enemyCount)
-				soundManager.playSound(SoundManager::SoundID::ENEMY_DEATH, 0.1f);
+				soundManager.playSound(SoundManager::SoundID::ENEMY_DEATH, 2.5f, 0.1f);
 
 			// On player death
 			if (player.getLivesCurrent() <= 0)
@@ -278,7 +280,7 @@ void Game::processSpawns()
 		float t = std::min(gameClock.getElapsedTime().asSeconds() / powerupSpawnParams.rampUpTime.asSeconds(), 1.f);
 		powerupSpawnParams.intervalCurrent = powerupSpawnParams.intervalMax - (powerupSpawnParams.intervalMax - powerupSpawnParams.intervalMin) * t;
 
-		soundManager.playSound(SoundManager::SoundID::POWERUP_SPAWN, 0.05f);
+		soundManager.playSound(SoundManager::SoundID::POWERUP_SPAWN, 5.f, 0.05f);
 	}
 }
 
@@ -290,7 +292,7 @@ void Game::processCollisionsWithPlayer(Enemy& enemy)
 		player.loseLife();
 		enemy.decreaseHealthBy(enemy.getHealth());
 		enemy.scoreValue = 0;
-		soundManager.playSound(SoundManager::SoundID::PLAYER_HIT);
+		soundManager.playSound(SoundManager::SoundID::PLAYER_HIT, 2.5f);
 	}
 }
 
@@ -301,6 +303,6 @@ void Game::processCollisionsWithPlayer(std::shared_ptr<PowerUp> powerUp)
 	{
 		powerUp->activate();
 		player.applyPowerUp(powerUp);
-		soundManager.playSound(SoundManager::SoundID::POWERUP_PICKUP);
+		soundManager.playSound(SoundManager::SoundID::POWERUP_ACTIVATE, 2.f);
 	}
 }

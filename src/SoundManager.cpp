@@ -17,11 +17,12 @@ void SoundManager::loadSounds()
 	load(SoundID::ENEMY_HIT, "assets/sounds/enemy-hit.wav");
 	load(SoundID::ENEMY_DEATH, "assets/sounds/enemy-death.wav");
 	load(SoundID::POWERUP_SPAWN, "assets/sounds/powerup-spawn.wav");
-	load(SoundID::POWERUP_PICKUP, "assets/sounds/powerup-pickup.wav");
+	load(SoundID::POWERUP_ACTIVATE, "assets/sounds/powerup-activate.wav");
+	load(SoundID::POWERUP_EXPIRE, "assets/sounds/powerup-expire.wav");
 	load(SoundID::GAME_OVER, "assets/sounds/game-over.wav");
 }
 
-void SoundManager::playSound(SoundID soundID, float pitchVariancePercentage)
+void SoundManager::playSound(SoundID soundID, float volumeMultiplier, float pitchVariancePercentage)
 {
 	auto it = soundBuffers.find(soundID);
 	if (it != soundBuffers.end()) {
@@ -34,7 +35,7 @@ void SoundManager::playSound(SoundID soundID, float pitchVariancePercentage)
 		if (pitchVariancePercentage != 0.f)
 			sound->setPitch(randomPitch(pitchVariancePercentage));
 
-		sound->setVolume(volume);
+		sound->setVolume(volume * volumeMultiplier);
 		sound->play();
 
 		activeSounds.push_back(sound);
