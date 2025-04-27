@@ -33,9 +33,10 @@ Enemy::Enemy() :
 	healthCurrent(healthMax),
 	flashTimer(sf::seconds(0.f)),
 	damage((shapeSize / 10.f + maxSpeed / 100.f) * 1.75f),
-	scoreValue(0)
+	scoreValue(0),
+	color(sf::Color::Red)
 {
-	shape.setFillColor(sf::Color::Red);
+	shape.setFillColor(color);
 	shape.setPosition({ 0.f, 0.f });
 }
 
@@ -246,5 +247,6 @@ void Enemy::updateColor()
 	float saturation = 0.9f - t * 0.2f;  // from 0.9 to 0.7
 	float value = 0.7f + t * 0.25f;      // from 0.7 to 0.95
 
-	shape.setFillColor(hsvToRgb(hue, saturation, value));
+	color = hsvToRgb(hue, saturation, value);
+	shape.setFillColor(color);
 }

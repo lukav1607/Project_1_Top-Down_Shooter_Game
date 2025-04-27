@@ -1,9 +1,9 @@
 #include "EffectManager.hpp"
 
-void EffectManager::update(float deltaTime)
+void EffectManager::update(float deltaTime, sf::Vector2f targetPosition)
 {
 	for (auto& effect : effects)
-		effect->update(deltaTime);
+		effect->update(deltaTime, targetPosition);
 
 	effects.erase(
 		std::remove_if(effects.begin(), effects.end(),

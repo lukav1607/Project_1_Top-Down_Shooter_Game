@@ -11,6 +11,8 @@ struct Fragment
 	sf::Angle anglePrevious;
 	float rotationSpeed = 0.f;
 	sf::RectangleShape shape;
+	sf::Color targetColor;
+	sf::Color startColor;
 	sf::Time lifetime;
 };
 
@@ -19,7 +21,7 @@ class EnemyFragmentsEffect : public Effect
 public:
 	EnemyFragmentsEffect(sf::Vector2f center, sf::Color color);
 
-	void update(float deltaTime) override;
+	void update(float deltaTime, sf::Vector2f targetPosition) override;
 	void render(float alpha, sf::RenderWindow& window) override;
 	bool isFinished() const override;
 

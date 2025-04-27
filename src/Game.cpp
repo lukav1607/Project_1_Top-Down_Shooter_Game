@@ -78,13 +78,15 @@ Game::Game() :
 	powerupSpawnParams.intervalMax = sf::seconds(18.f);
 	powerupSpawnParams.rampUpTime = sf::seconds(120.f);
 	powerupSpawnParams.intervalCurrent = powerupSpawnParams.intervalMax;
-	powerupSpawnParams.timeSinceLastSpawn = sf::seconds(0.f);
+	powerupSpawnParams.timeSinceLastSpawn = powerupSpawnParams.intervalMax - sf::seconds(2.f) ;
 
 	// Seed the random number generator
 	std::srand(static_cast<unsigned>(std::time(nullptr)));
 
 	soundManager.loadSounds();
 	soundManager.volume = 50.f;
+
+	
 
 	logicClock.stop();
 	gameClock.stop();
@@ -124,6 +126,7 @@ void Game::update()
 	{
 		if (isKeyReleased(sf::Keyboard::Key::Enter))
 		{
+			generateBackground();
 			gameState = GameState::PLAYING;
 			gameClock.start();
 			logicClock.start();
@@ -198,7 +201,7 @@ void Game::update()
 			hud.update(window, player.getLivesCurrent(), player.getLivesMax(), player.score, player.getActivePowerUp());
 
 			// Update effects
-			effectManager.update(TIMESTEP);
+			effectManager.update(TIMESTEP, player.getPosition());
 
 			// On player death
 			if (player.getLivesCurrent() <= 0)
@@ -244,6 +247,9 @@ void Game::render()
 	//  Playing state
 	else if (gameState == GameState::PLAYING)
 	{
+		for (const auto& star : backgroundStars)
+			window.draw(star);
+
 		effectManager.render(alpha, window);
 		player.render(alpha, window, isDebugModeOn);
 
@@ -312,5 +318,26 @@ void Game::processCollisionsWithPlayer(std::shared_ptr<PowerUp> powerUp)
 		player.applyPowerUp(powerUp);
 		effectManager.addEffect(std::make_shared<PowerUpAbsorbEffect>(powerUp->getPosition(), player.getPosition(), powerUp->getColor()));
 		soundManager.playSound(SoundManager::SoundID::POWERUP_ACTIVATE, 2.f);
+	}
+}
+
+void Game::generateBackground()
+{
+	for (unsigned i = 0; i < BACKGROUND_STARS_COUNT; ++i)
+	{
+		sf::RectangleShape star;
+
+		float size = getRandomNumber(1.f, 5.f);
+		star.setSize({ size, size });
+		star.setOrigin({ size / 2.f, size / 2.f });
+
+		std::uint8_t colorValue = getRandomNumber(175, 225);
+		star.setFillColor(sf::Color(colorValue, colorValue, colorValue, 255U));
+
+		star.setPosition({ getRandomNumber(0.f, static_cast<float>(WINDOW_SIZE.x)), getRandomNumber(0.f, static_cast<float>(WINDOW_SIZE.y)) });
+		sf::Angle rotation = sf::degrees(getRandomNumber(0.f, 360.f));
+		star.setRotation(rotation);
+
+		backgroundStars.push_back(star);
 	}
 }

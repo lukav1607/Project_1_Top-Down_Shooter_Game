@@ -14,7 +14,6 @@ ParticleSystem::ParticleSystem() :
 void ParticleSystem::spawnNew(sf::Vector2f position, sf::Vector2f direction, sf::Color color, unsigned count)
 {
 	static std::mt19937 gen(std::random_device{}());
-	//static std::uniform_real_distribution<float> angleDist(0.f, 2.f * 3.14159f);
 	static std::uniform_real_distribution<float> offsetDist(-0.5f, 0.5f);
 	static std::uniform_real_distribution<float> speedDist(150.f, 300.f);
 
@@ -23,7 +22,6 @@ void ParticleSystem::spawnNew(sf::Vector2f position, sf::Vector2f direction, sf:
 		float speed = speedDist(gen);
 		float size = getRandomNumber(sizeMin, sizeMax);
 
-		//float angle = angleDist(gen);
 		float angleOffset = offsetDist(gen) * spreadAngle.asRadians();
 		float cosA = std::cos(angleOffset);
 		float sinA = std::sin(angleOffset);

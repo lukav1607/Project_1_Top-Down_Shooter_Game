@@ -21,7 +21,7 @@ public:
 	inline float getCollisionRadius() const { return collisionRadius; }
 	inline sf::Vector2f getPosition() const { return positionCurrent; }
 	inline sf::FloatRect getGlobalBounds() const { return shape.getGlobalBounds(); }
-	inline sf::Color getColor() const { return shape.getFillColor(); }
+	inline sf::Color getColor() const { return color; }
 
 	int scoreValue;
 
@@ -43,6 +43,7 @@ private:
 	float healthGrowth;
 
 	sf::RectangleShape shape;
+	sf::Color color;
 	float shapeSize;
 	float collisionRadius;
 

@@ -44,6 +44,9 @@ private:
 	float scalePrevious;
 	float scaleAmplitude;
 	float scaleSpeed;
+	float scaleBase;
+	bool isScaledUp;
+	bool isScaledDown;
 
 	bool isActivated;
 	bool needsDeleting;

@@ -7,10 +7,13 @@ using namespace Utility;
 
 PowerUp::PowerUp(const sf::Vector2u& windowSize, int playerLivesCurrent, unsigned playerLivesMax) :
 	rotationSpeed(10.f),
-	scaleCurrent(1.f),
-	scalePrevious(1.f),
+	scaleCurrent(0.f),
+	scalePrevious(0.f),
 	scaleAmplitude(0.15f),
 	scaleSpeed(3.f),
+	scaleBase(1.f),
+	isScaledUp(false),
+	isScaledDown(false),
 	shapeSize(40.f),
 	collisionRadius(shapeSize / 2.f),
 	isActivated(false),
@@ -23,6 +26,7 @@ PowerUp::PowerUp(const sf::Vector2u& windowSize, int playerLivesCurrent, unsigne
 	shape.setSize({ shapeSize, shapeSize });
 	shape.setOrigin({ shapeSize / 2.f, shapeSize / 2.f });
 	shape.setRotation(sf::degrees(45.f));
+	shape.setScale({ 0.f, 0.f });
 	shape.setPosition
 	( 
 		{ getRandomNumber(shapeSize, windowSize.x - shapeSize),
@@ -77,8 +81,27 @@ void PowerUp::update(float deltaTime)
 {
 	timer += sf::seconds(deltaTime);
 
+	if (isActivated && !isScaledDown)
+	{
+		scalePrevious = scaleCurrent;
+		scaleCurrent -= deltaTime * 5.f;
+
+		if (scaleCurrent <= 0.f)
+			isScaledDown = true;
+	}
+
 	if (!isActivated)
 	{
+		if (!isScaledUp)
+		{
+			scalePrevious = scaleCurrent;
+			scaleCurrent += deltaTime * 5.f;
+
+			if (scaleCurrent >= scaleBase)
+				isScaledUp = true;
+
+			return;
+		}
 		scalePrevious = scaleCurrent;
 		scaleCurrent = std::sin(pulseClock.getElapsedTime().asSeconds() * scaleSpeed) * scaleAmplitude + 1.f;
 
@@ -111,7 +134,7 @@ void PowerUp::update(float deltaTime)
 
 void PowerUp::render(float alpha, sf::RenderWindow& window, bool isDebugModeOn)
 {
-	if (!isActivated)
+	if (!isActivated || !isScaledDown)
 	{
 		shape.setScale({ interpolate(scalePrevious, scaleCurrent, alpha), interpolate(scalePrevious, scaleCurrent, alpha) });
 

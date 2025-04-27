@@ -8,65 +8,72 @@ EnemyFragmentsEffect::EnemyFragmentsEffect(sf::Vector2f center, sf::Color color)
 	const int FRAGMENT_COUNT = 8;
 	for (int i = 0; i < FRAGMENT_COUNT; ++i)
 	{
-		Fragment fragment;
+		Fragment f;
 
 		sf::Angle angle = sf::degrees(getRandomNumber(0.f, 360.f));
 		float speed = getRandomNumber(25.f, 100.f);
 
-		fragment.positionPrevious = center;
-		fragment.positionCurrent = center;
-		fragment.velocity = { std::cos(angle.asRadians()) * speed, std::sin(angle.asRadians()) * speed };
+		f.positionPrevious = center;
+		f.positionCurrent = center;
+		f.velocity = { std::cos(angle.asRadians()) * speed, std::sin(angle.asRadians()) * speed };
 
-		fragment.angleCurrent = sf::degrees(getRandomNumber(0.f, 360.f));
-		fragment.anglePrevious = fragment.angleCurrent;
-		fragment.rotationSpeed = getRandomNumber(-90.f, 90.f);
+		f.angleCurrent = sf::degrees(getRandomNumber(0.f, 360.f));
+		f.anglePrevious = f.angleCurrent;
+		f.rotationSpeed = getRandomNumber(-90.f, 90.f);
 
 		float size = getRandomNumber(16.f, 24.f);
-		fragment.shape.setSize({ size, size });
-		fragment.shape.setOrigin({ size / 2.f, size / 2.f });
-		fragment.shape.setPosition(center);
-		fragment.shape.setFillColor(color);
+		f.shape.setSize({ size, size });
+		f.shape.setOrigin({ size / 2.f, size / 2.f });
+		f.shape.setPosition(center);
 
-		fragment.lifetime = sf::seconds(getRandomNumber(0.5f, 1.f));
+		f.targetColor = color;
+		f.startColor = sf::Color::White;
+		f.shape.setFillColor(f.startColor);
 
-		fragments.push_back(fragment);
+		f.lifetime = sf::seconds(getRandomNumber(0.5f, 1.f));
+
+		fragments.push_back(f);
 	}
 }
 
-void EnemyFragmentsEffect::update(float deltaTime)
+void EnemyFragmentsEffect::update(float deltaTime, sf::Vector2f targetPosition)
 {
 	elapsedTime += sf::seconds(deltaTime);
 
-	for (auto& fragment : fragments)
+	for (auto& f : fragments)
 	{
-		fragment.positionPrevious = fragment.positionCurrent;
-		fragment.positionCurrent += fragment.velocity * deltaTime;
-		fragment.anglePrevious = fragment.angleCurrent;
-		fragment.angleCurrent += sf::degrees(fragment.rotationSpeed * deltaTime);
+		f.positionPrevious = f.positionCurrent;
+		f.positionCurrent += f.velocity * deltaTime;
+		f.anglePrevious = f.angleCurrent;
+		f.angleCurrent += sf::degrees(f.rotationSpeed * deltaTime);
 
-		// Fade out over lifetime
-		float ratio = 1.f - (elapsedTime.asSeconds() / fragment.lifetime.asSeconds());
-		sf::Color color = fragment.shape.getFillColor();
-		color.a = static_cast<std::uint8_t>(255 * std::max(0.f, ratio));
-		fragment.shape.setFillColor(color);
+		float lifetimeProgress = 1.f - (elapsedTime.asSeconds() / f.lifetime.asSeconds());
+		lifetimeProgress = std::clamp(lifetimeProgress, 0.f, 1.f);
+
+		std::uint8_t r = static_cast<std::uint8_t>(f.targetColor.r + (f.startColor.r - f.targetColor.r) * lifetimeProgress);
+		std::uint8_t g = static_cast<std::uint8_t>(f.targetColor.g + (f.startColor.g - f.targetColor.g) * lifetimeProgress);
+		std::uint8_t b = static_cast<std::uint8_t>(f.targetColor.b + (f.startColor.b - f.targetColor.b) * lifetimeProgress);
+		std::uint8_t a = static_cast<std::uint8_t>(255 * std::max(0.f, lifetimeProgress));
+
+		f.shape.setFillColor(sf::Color(r, g, b, a));
 	}
 }
 
 void EnemyFragmentsEffect::render(float alpha, sf::RenderWindow& window)
 {
-	for (auto& fragment : fragments)
+	for (auto& f : fragments)
 	{
 		// Interpolate between the previous and current position for smooth rendering
-		fragment.shape.setPosition(interpolate(fragment.positionPrevious, fragment.positionCurrent, alpha));
+		f.shape.setPosition(interpolate(f.positionPrevious, f.positionCurrent, alpha));
 
 		// Interpolate between the previous and current angle for smooth rendering
-		fragment.shape.setRotation(interpolate(fragment.anglePrevious, fragment.angleCurrent, alpha));
+		f.shape.setRotation(interpolate(f.anglePrevious, f.angleCurrent, alpha));
 
-		window.draw(fragment.shape);
+		window.draw(f.shape);
 	}
 }
 
 bool EnemyFragmentsEffect::isFinished() const
 {
-	return false;
+	return elapsedTime > LIFETIME_MAX;
 }

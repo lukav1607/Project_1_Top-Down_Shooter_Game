@@ -31,6 +31,7 @@ private:
 	void processSpawns();
 	void processCollisionsWithPlayer(Enemy& enemy);
 	void processCollisionsWithPlayer(std::shared_ptr<PowerUp> powerUp);
+	void generateBackground();
 		
 	sf::RenderWindow window;
 	sf::ContextSettings settings;
@@ -59,7 +60,11 @@ private:
 	};
 	Text text;
 
+	std::vector<sf::RectangleShape> backgroundStars;
+	const unsigned BACKGROUND_STARS_COUNT = 50U;
+
 	Player player;
+
 	HUD hud;
 
 	struct SpawnParameters
