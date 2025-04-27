@@ -37,5 +37,3 @@ SFML01 is a top-down shooter game created with C++ and SFML 3.0. The game featur
 
 ## License
 MIT License
-
-* [SFML](https://www.sfml-dev.org/)
