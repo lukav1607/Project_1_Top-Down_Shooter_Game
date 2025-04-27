@@ -15,7 +15,7 @@ public:
 	void render(float alpha, sf::RenderWindow& window, bool isDebugModeOn);
 
 	void decreaseHealthBy(int amount);
-	bool getNeedsDeleting() const { return needsDeleting; }
+	bool getNeedsDeleting() const { return hasFinishedRendering; }
 	inline float getHealth() const { return healthMax; }
 	inline float getDamage() const { return damage; }
 	inline float getCollisionRadius() const { return collisionRadius; }
@@ -32,7 +32,8 @@ private:
 	void updateColor();
 
 	bool isFirstUpdate;
-	bool needsDeleting;
+	bool isAboutToDie;
+	bool hasFinishedRendering;
 
 	sf::Vector2f positionCurrent;
 	sf::Vector2f positionPrevious;
@@ -44,6 +45,9 @@ private:
 	sf::RectangleShape shape;
 	float shapeSize;
 	float collisionRadius;
+
+	float scaleCurrent;
+	float scalePrevious;
 
 	sf::Vector2f velocity;
 	sf::Vector2f direction;

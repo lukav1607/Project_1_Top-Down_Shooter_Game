@@ -7,6 +7,7 @@
 #include "Enemy.hpp"
 #include "PowerUp.hpp"
 #include "SoundManager.hpp"
+#include "EffectManager.hpp"
 
 class Game
 {
@@ -77,4 +78,6 @@ private:
 	SpawnParameters powerupSpawnParams;
 	
 	SoundManager soundManager;
+
+	EffectManager effectManager;
 };

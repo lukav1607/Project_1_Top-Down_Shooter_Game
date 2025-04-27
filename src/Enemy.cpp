@@ -10,7 +10,8 @@ using namespace Utility;
 
 Enemy::Enemy() :
 	isFirstUpdate(true),
-	needsDeleting(false),
+	hasFinishedRendering(false),
+	isAboutToDie(false),
 	positionCurrent({ 0.f, 0.f }),
 	positionPrevious(positionCurrent),
 	speedGrowth(0.02f),
@@ -18,6 +19,8 @@ Enemy::Enemy() :
 	healthGrowth(0.066f),
 	shapeSize(60.f),
 	collisionRadius(shapeSize / 2.f),
+	scaleCurrent(1.f),
+	scalePrevious(1.f),
 	velocity({ 0.f, 0.f }),
 	direction({ 0.f, 0.f }),
 	acceleration(1000.f),
@@ -60,11 +63,8 @@ void Enemy::initTimeBasedModifiers(sf::Time timeSinceStart)
 
 int Enemy::update(float deltaTime, const sf::RenderWindow& window, sf::Vector2f playerPosition)
 {
-	if (healthCurrent <= 0.f && !needsDeleting)
-	{
-		needsDeleting = true;
-		return scoreValue;
-	}
+	if (healthCurrent <= 0.f && !isAboutToDie)
+		isAboutToDie = true;
 
 	if (isFirstUpdate)
 	{
@@ -107,6 +107,17 @@ int Enemy::update(float deltaTime, const sf::RenderWindow& window, sf::Vector2f 
 		updateColor();
 	}
 
+	if (isAboutToDie && !hasFinishedRendering)
+	{
+		scalePrevious = scaleCurrent;
+		scaleCurrent -= deltaTime * 10.f;
+		if (scaleCurrent <= 0.f)
+		{
+			hasFinishedRendering = true;
+			return scoreValue;
+		}
+	}
+
 	return 0;
 }
 
@@ -117,6 +128,9 @@ void Enemy::render(float alpha, sf::RenderWindow& window, bool isDebugModeOn)
 
 	// Interpolate between the previous and current angle for smooth rendering
 	shape.setRotation(interpolate(anglePrevious, angleCurrent, alpha));
+
+	if (isAboutToDie && !hasFinishedRendering)
+		shape.setScale({ interpolate(scalePrevious, scaleCurrent, alpha), interpolate(scalePrevious, scaleCurrent, alpha) });
 
 	window.draw(shape);
 

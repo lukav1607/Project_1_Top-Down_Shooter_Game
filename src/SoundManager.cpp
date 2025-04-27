@@ -25,7 +25,8 @@ void SoundManager::loadSounds()
 void SoundManager::playSound(SoundID soundID, float volumeMultiplier, float pitchVariancePercentage)
 {
 	auto it = soundBuffers.find(soundID);
-	if (it != soundBuffers.end()) {
+	if (it != soundBuffers.end()) 
+	{
 		auto sound = std::make_shared<sf::Sound>(*it->second);
 
 		if (pitchVariancePercentage < 0.f || pitchVariancePercentage > 1.f) {
@@ -39,15 +40,15 @@ void SoundManager::playSound(SoundID soundID, float volumeMultiplier, float pitc
 		sound->play();
 
 		activeSounds.push_back(sound);
-
-		std::cout << "Number of active sounds: " << activeSounds.size() << std::endl;
 	}
-	else {
+	else 
+	{
 		std::cerr << "Error: Sound ID not found!" << std::endl;
 	}
 }
 
-void SoundManager::cleanupSounds() {
+void SoundManager::cleanupSounds() 
+{
 	activeSounds.erase(
 		std::remove_if(activeSounds.begin(), activeSounds.end(),
 			[](const std::shared_ptr<sf::Sound>& sound) {

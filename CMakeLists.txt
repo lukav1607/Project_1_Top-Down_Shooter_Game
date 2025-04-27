@@ -22,7 +22,10 @@ add_executable(
     src/PowerUp.cpp 
     src/Game.cpp 
     src/ParticleSystem.cpp 
-    src/SoundManager.cpp)
+    src/SoundManager.cpp 
+    src/EffectManager.cpp 
+    src/EnemyFragmentsEffect.cpp 
+    src/PowerUpAbsorbEffect.cpp)
 target_compile_features(main PRIVATE cxx_std_17)
 target_link_libraries(main PRIVATE SFML::Graphics SFML::Window SFML::System SFML::Audio)
 target_compile_definitions(main PRIVATE SFML_STATIC)

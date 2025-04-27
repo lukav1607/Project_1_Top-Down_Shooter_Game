@@ -23,6 +23,7 @@ public:
 
 	inline bool getNeedsDeleting() const { return needsDeleting; }
 	inline Type getType() const { return type; }
+	inline sf::Color getColor() const { return color; }
 	inline const std::string& getName() const { return name; }
 	inline sf::Time getTimeLeft() const { return buffDuration - timer; }
 	inline sf::Vector2f getPosition() const { return shape.getPosition(); }

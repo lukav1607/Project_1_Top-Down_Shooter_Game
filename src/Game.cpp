@@ -1,5 +1,7 @@
 #include "Game.hpp"
 #include "Utility.hpp"
+#include "EnemyFragmentsEffect.hpp"
+#include "PowerUpAbsorbEffect.hpp"
 
 #include <iostream>
 #include <cmath>
@@ -62,10 +64,7 @@ Game::Game() :
 	auto settings = sf::ContextSettings();
 	settings.antiAliasingLevel = 8;
 	window = sf::RenderWindow(sf::VideoMode(WINDOW_SIZE), "Top-down Shooter", sf::State::Windowed, settings);
-	window.setVerticalSyncEnabled(true); 
-
-	std::cout << "Audio device count: " << sf::PlaybackDevice::getAvailableDevices().size() << std::endl;
-	std::cout << "Default audio device: " << sf::PlaybackDevice::getDefaultDevice().value() << std::endl;
+	window.setVerticalSyncEnabled(true);
 
 	// Enemy spawn parameters
 	enemySpawnParams.intervalMin = sf::seconds(0.75f);
@@ -171,13 +170,23 @@ void Game::update()
 						break;
 				}
 			}
+
 			// Update enemies
 			for (auto& enemy : enemies) {
 				// Update enemy and add score if it is killed
 				player.score += enemy.update(TIMESTEP, window, player.getPosition());
 				processCollisionsWithPlayer(enemy);
-			}
 
+				if (enemy.getNeedsDeleting())
+					effectManager.addEffect(std::make_shared<EnemyFragmentsEffect>(enemy.getPosition(), enemy.getColor()));
+			}
+			// Remove dead enemies
+			unsigned enemyCount = enemies.size();
+			enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const Enemy& e) { return e.getNeedsDeleting(); }), enemies.end());
+			if (enemies.size() < enemyCount)
+				soundManager.playSound(SoundManager::SoundID::ENEMY_DEATH, 2.25f, 0.1f);
+
+			// Update player
 			player.update(TIMESTEP, window, enemies);
 			if (player.wasBulletJustFired())
 				soundManager.playSound(SoundManager::SoundID::PLAYER_SHOOT, 1.f, 0.15f);
@@ -188,11 +197,8 @@ void Game::update()
 
 			hud.update(window, player.getLivesCurrent(), player.getLivesMax(), player.score, player.getActivePowerUp());
 
-			// Remove dead enemies
-			unsigned enemyCount = enemies.size();
-			enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const Enemy& e) { return e.getNeedsDeleting(); }), enemies.end());
-			if (enemies.size() < enemyCount)
-				soundManager.playSound(SoundManager::SoundID::ENEMY_DEATH, 2.5f, 0.1f);
+			// Update effects
+			effectManager.update(TIMESTEP);
 
 			// On player death
 			if (player.getLivesCurrent() <= 0)
@@ -238,6 +244,7 @@ void Game::render()
 	//  Playing state
 	else if (gameState == GameState::PLAYING)
 	{
+		effectManager.render(alpha, window);
 		player.render(alpha, window, isDebugModeOn);
 
 		for (auto& enemy : enemies)
@@ -303,6 +310,7 @@ void Game::processCollisionsWithPlayer(std::shared_ptr<PowerUp> powerUp)
 	{
 		powerUp->activate();
 		player.applyPowerUp(powerUp);
+		effectManager.addEffect(std::make_shared<PowerUpAbsorbEffect>(powerUp->getPosition(), player.getPosition(), powerUp->getColor()));
 		soundManager.playSound(SoundManager::SoundID::POWERUP_ACTIVATE, 2.f);
 	}
 }
