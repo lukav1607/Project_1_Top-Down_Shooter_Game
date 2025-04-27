@@ -30,6 +30,7 @@ private:
 	void render();
 
 	void processSpawns();
+	void resetSpawnParams();
 	void processCollisionsWithPlayer(Enemy& enemy);
 	void processCollisionsWithPlayer(std::shared_ptr<PowerUp> powerUp);
 	void generateBackground();
@@ -59,8 +60,11 @@ private:
 		sf::Text score;
 		sf::Text restart;
 		unsigned textAlpha;
+		unsigned textAlphaSecondary;
 	};
 	Text text;
+	bool isMainTextFadedIn;
+	bool areMenuFadeInsFinished;
 
 	std::vector<sf::RectangleShape> backgroundStars;
 	const unsigned BACKGROUND_STARS_COUNT = 50U;

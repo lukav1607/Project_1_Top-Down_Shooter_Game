@@ -77,3 +77,9 @@ bool EnemyFragmentsEffect::isFinished() const
 {
 	return elapsedTime > LIFETIME_MAX;
 }
+
+void EnemyFragmentsEffect::clear()
+{
+	fragments.clear();
+	elapsedTime = sf::Time::Zero;
+}

@@ -25,6 +25,8 @@ public:
 	void render(float alpha, sf::RenderWindow& window) override;
 	bool isFinished() const override;
 
+	void clear();
+
 private:
 	std::vector<Fragment> fragments;
 	sf::Time elapsedTime;

@@ -124,3 +124,10 @@ bool PowerUpAbsorbEffect::isFinished() const
 	}
 	return false;
 }
+
+void PowerUpAbsorbEffect::clear()
+{
+	particles.clear();
+	elapsedTime = sf::Time::Zero;
+	phase = PowerUpAbsorbPhase::OUTWARD_BURST;
+}

@@ -16,3 +16,8 @@ void EffectManager::render(float alpha, sf::RenderWindow& window)
 	for (const auto& effect : effects)
 		effect->render(alpha, window);
 }
+
+void EffectManager::clear()
+{
+	effects.clear();
+}

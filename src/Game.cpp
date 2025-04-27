@@ -14,7 +14,8 @@ Game::Text::Text(const sf::Font& font, sf::Vector2u windowSize) :
 	gameOver(font),
 	score(font),
 	restart(font),
-	textAlpha(0)
+	textAlpha(0),
+	textAlphaSecondary(0)
 {
 	title.setFillColor(sf::Color(255, 255, 255, textAlpha));
 	title.setCharacterSize(60U);
@@ -60,7 +61,9 @@ Game::Game() :
 	maxEnemies(25U),
 	//
 	screenTransition(WINDOW_SIZE),
-	isScreenTransitionClosing(false)
+	isScreenTransitionClosing(false),
+	isMainTextFadedIn(false),
+	areMenuFadeInsFinished(false)
 {
 	enemies.reserve(maxEnemies);
 
@@ -70,19 +73,7 @@ Game::Game() :
 	window = sf::RenderWindow(sf::VideoMode(WINDOW_SIZE), "Top-down Shooter", sf::State::Windowed, settings);
 	window.setVerticalSyncEnabled(true);
 
-	// Enemy spawn parameters
-	enemySpawnParams.intervalMin = sf::seconds(0.75f);
-	enemySpawnParams.intervalMax = sf::seconds(1.25f);
-	enemySpawnParams.rampUpTime = sf::seconds(180.f);
-	enemySpawnParams.intervalCurrent = enemySpawnParams.intervalMax;
-	enemySpawnParams.timeSinceLastSpawn = sf::seconds(0.f);
-
-	// Powerup spawn parameters
-	powerupSpawnParams.intervalMin = sf::seconds(12.f);
-	powerupSpawnParams.intervalMax = sf::seconds(18.f);
-	powerupSpawnParams.rampUpTime = sf::seconds(120.f);
-	powerupSpawnParams.intervalCurrent = powerupSpawnParams.intervalMax;
-	powerupSpawnParams.timeSinceLastSpawn = sf::seconds(0.f);
+	resetSpawnParams();
 
 	// Seed the random number generator
 	std::srand(static_cast<unsigned>(std::time(nullptr)));
@@ -126,20 +117,42 @@ void Game::update()
 	// Title screen state
 	if (gameState == GameState::TITLE)
 	{
-		if (text.textAlpha < 255)
+		if (text.textAlpha < 255 && !isMainTextFadedIn)
 		{
-			text.textAlpha += TIMESTEP * 500;
+			text.textAlpha += TIMESTEP * 350;
 			if (text.textAlpha >= 255)
+			{
 				text.textAlpha = 255;
-
+				isMainTextFadedIn = true;
+			}
 			text.title.setFillColor(sf::Color(255, 255, 255, text.textAlpha));
-			text.start.setFillColor(sf::Color(255, 255, 255, text.textAlpha));
 		}
-		if (isKeyReleased(sf::Keyboard::Key::Enter))
+		if (text.textAlphaSecondary < 255 && isMainTextFadedIn)
+		{
+			text.textAlphaSecondary += TIMESTEP * 350;
+			if (text.textAlphaSecondary >= 255)
+			{
+				text.textAlphaSecondary = 255;
+			}
+			text.start.setFillColor(sf::Color(255, 255, 255, text.textAlphaSecondary));
+		}
+		if (text.textAlphaSecondary == 255) // Only pulse after fully faded in
+		{
+			static float pulseTimer = 0.f;
+			pulseTimer += TIMESTEP;
+
+			float scale = 1.f + 0.04f * std::sin(pulseTimer * 2.f); // 3.f = speed, 0.05f = amount
+			text.start.setScale({ scale, scale });
+			areMenuFadeInsFinished = true;
+		}
+		if (areMenuFadeInsFinished && isKeyReleased(sf::Keyboard::Key::Enter))
 		{
 			text.textAlpha = 0;
+			text.textAlphaSecondary = 0;
+			isMainTextFadedIn = false;
+			areMenuFadeInsFinished = false;
 			text.title.setFillColor(sf::Color(255, 255, 255, text.textAlpha));
-			text.start.setFillColor(sf::Color(255, 255, 255, text.textAlpha));
+			text.start.setFillColor(sf::Color(255, 255, 255, text.textAlphaSecondary));
 
 			generateBackground();
 			screenTransition.start(ScreenTransition::Mode::OPENING, { window.getSize().x / 2.f, window.getSize().y / 2.f });
@@ -151,22 +164,44 @@ void Game::update()
 	//  Game over state
 	else if (gameState == GameState::GAME_OVER)
 	{
-		if (text.textAlpha < 255)
+		if (text.textAlpha < 255 && !isMainTextFadedIn)
 		{
-			text.textAlpha += TIMESTEP * 500;
+			text.textAlpha += TIMESTEP * 350;
 			if (text.textAlpha >= 255)
+			{
 				text.textAlpha = 255;
-
+				isMainTextFadedIn = true;
+			}
 			text.gameOver.setFillColor(sf::Color(255, 255, 255, text.textAlpha));
 			text.score.setFillColor(sf::Color(255, 255, 255, text.textAlpha));
-			text.restart.setFillColor(sf::Color(255, 255, 255, text.textAlpha));
 		}
-		if (isKeyReleased(sf::Keyboard::Key::Enter))
+		if (text.textAlphaSecondary < 255 && isMainTextFadedIn)
+		{
+			text.textAlphaSecondary += TIMESTEP * 350;
+			if (text.textAlphaSecondary >= 255)
+			{
+				text.textAlphaSecondary = 255;
+			}
+			text.restart.setFillColor(sf::Color(255, 255, 255, text.textAlphaSecondary));
+		}
+		if (text.textAlphaSecondary == 255) // Only pulse after fully faded in
+		{
+			static float pulseTimer = 0.f;
+			pulseTimer += TIMESTEP;
+
+			float scale = 1.f + 0.04f * std::sin(pulseTimer * 2.f); // 3.f = speed, 0.05f = amount
+			text.restart.setScale({ scale, scale });
+			areMenuFadeInsFinished = true;
+		}
+		if (areMenuFadeInsFinished && isKeyReleased(sf::Keyboard::Key::Enter))
 		{
 			text.textAlpha = 0;
+			text.textAlphaSecondary = 0;
+			isMainTextFadedIn = false;
+			areMenuFadeInsFinished = false;
 			text.gameOver.setFillColor(sf::Color(255, 255, 255, text.textAlpha));
 			text.score.setFillColor(sf::Color(255, 255, 255, text.textAlpha));
-			text.restart.setFillColor(sf::Color(255, 255, 255, text.textAlpha));
+			text.restart.setFillColor(sf::Color(255, 255, 255, text.textAlphaSecondary));
 
 			gameState = GameState::TITLE;
 			gameClock.reset();
@@ -252,6 +287,8 @@ void Game::update()
 				{
 					gameState = GameState::GAME_OVER;
 					soundManager.playSound(SoundManager::SoundID::GAME_OVER);
+					resetSpawnParams();
+					effectManager.clear();
 
 					text.score.setString("Score: " + std::to_string(player.score));
 					text.score.setOrigin({ text.score.getGlobalBounds().size.x / 2.f, text.score.getGlobalBounds().size.y / 2.f });
@@ -343,6 +380,23 @@ void Game::processSpawns()
 
 		soundManager.playSound(SoundManager::SoundID::POWERUP_SPAWN, 5.f, 0.05f);
 	}
+}
+
+void Game::resetSpawnParams()
+{
+	// Enemy spawn parameters
+	enemySpawnParams.intervalMin = sf::seconds(0.75f);
+	enemySpawnParams.intervalMax = sf::seconds(1.33f);
+	enemySpawnParams.rampUpTime = sf::seconds(180.f);
+	enemySpawnParams.intervalCurrent = enemySpawnParams.intervalMax;
+	enemySpawnParams.timeSinceLastSpawn = sf::seconds(0.f);
+
+	// Powerup spawn parameters
+	powerupSpawnParams.intervalMin = sf::seconds(12.f);
+	powerupSpawnParams.intervalMax = sf::seconds(18.f);
+	powerupSpawnParams.rampUpTime = sf::seconds(120.f);
+	powerupSpawnParams.intervalCurrent = powerupSpawnParams.intervalMax;
+	powerupSpawnParams.timeSinceLastSpawn = sf::seconds(0.f);
 }
 
 void Game::processCollisionsWithPlayer(Enemy& enemy)

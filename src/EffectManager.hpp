@@ -10,6 +10,8 @@ public:
 	void update(float deltaTime, sf::Vector2f targetPosition);
 	void render(float alpha, sf::RenderWindow& window);
 
+	void clear();
+
 private:
 	std::vector<std::shared_ptr<Effect>> effects;
 };

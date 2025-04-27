@@ -32,6 +32,8 @@ public:
 	void update(float deltaTime, sf::Vector2f targetPosition) override;
 	void render(float alpha, sf::RenderWindow& window) override;
 	bool isFinished() const override;
+	
+	void clear();
 
 private:
 	std::vector<PowerUpParticle> particles;
