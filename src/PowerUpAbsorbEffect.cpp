@@ -117,12 +117,10 @@ bool PowerUpAbsorbEffect::isFinished() const
 	// Check if all particles are small and almost invisible
 	for (const auto& p : particles)
 	{
-		if (p.scaleCurrent > 0.1f || p.shape.getFillColor().a > 10/* || playerPosition != p.positionCurrent*/)
+		if (p.scaleCurrent < 0.1f || p.shape.getFillColor().a < 10)
 		{
-			std::cout << "Particle not finished" << std::endl;
-			return false;
+			return true;
 		}
 	}
-	std::cout << "Particle finished" << std::endl;
-	return true;
+	return false;
 }

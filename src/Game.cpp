@@ -13,30 +13,31 @@ Game::Text::Text(const sf::Font& font, sf::Vector2u windowSize) :
 	start(font),
 	gameOver(font),
 	score(font),
-	restart(font)
+	restart(font),
+	textAlpha(0)
 {
-	title.setFillColor(sf::Color::White);
+	title.setFillColor(sf::Color(255, 255, 255, textAlpha));
 	title.setCharacterSize(60U);
 	title.setString("TOP-DOWN SHOOTER");
 	title.setOrigin({ title.getGlobalBounds().size.x / 2.f, title.getGlobalBounds().size.y / 2.f });
 	title.setPosition({ windowSize.x / 2.f, windowSize.y / 2.f - 50.f });
 
-	start.setFillColor(sf::Color::White);
+	start.setFillColor(sf::Color(255, 255, 255, textAlpha));
 	start.setCharacterSize(30U);
 	start.setString("Press Enter to start");
 	start.setOrigin({ start.getGlobalBounds().size.x / 2.f, start.getGlobalBounds().size.y / 2.f });
 	start.setPosition({ windowSize.x / 2.f, windowSize.y / 2.f + 50.f });
 
-	gameOver.setFillColor(sf::Color::White);
+	gameOver.setFillColor(sf::Color(255, 255, 255, textAlpha));
 	gameOver.setCharacterSize(60U);
 	gameOver.setString("GAME OVER");
 	gameOver.setOrigin({ gameOver.getGlobalBounds().size.x / 2.f, gameOver.getGlobalBounds().size.y / 2.f });
 	gameOver.setPosition({ windowSize.x / 2.f, windowSize.y / 2.f - 80.f });
 
-	score.setFillColor(sf::Color::White);
+	score.setFillColor(sf::Color(255, 255, 255, textAlpha));
 	score.setCharacterSize(45U);
 
-	restart.setFillColor(sf::Color::White);
+	restart.setFillColor(sf::Color(255, 255, 255, textAlpha));
 	restart.setCharacterSize(30U);
 	restart.setString("Press Enter to restart");
 	restart.setOrigin({ restart.getGlobalBounds().size.x / 2.f, restart.getGlobalBounds().size.y / 2.f });
@@ -56,7 +57,10 @@ Game::Game() :
 	// Entities
 	player(WINDOW_SIZE),
 	hud(font, window),
-	maxEnemies(25U)
+	maxEnemies(25U),
+	//
+	screenTransition(WINDOW_SIZE),
+	isScreenTransitionClosing(false)
 {
 	enemies.reserve(maxEnemies);
 
@@ -78,16 +82,14 @@ Game::Game() :
 	powerupSpawnParams.intervalMax = sf::seconds(18.f);
 	powerupSpawnParams.rampUpTime = sf::seconds(120.f);
 	powerupSpawnParams.intervalCurrent = powerupSpawnParams.intervalMax;
-	powerupSpawnParams.timeSinceLastSpawn = powerupSpawnParams.intervalMax - sf::seconds(2.f) ;
+	powerupSpawnParams.timeSinceLastSpawn = sf::seconds(0.f);
 
 	// Seed the random number generator
 	std::srand(static_cast<unsigned>(std::time(nullptr)));
 
 	soundManager.loadSounds();
 	soundManager.volume = 50.f;
-
 	
-
 	logicClock.stop();
 	gameClock.stop();
 }
@@ -124,9 +126,23 @@ void Game::update()
 	// Title screen state
 	if (gameState == GameState::TITLE)
 	{
+		if (text.textAlpha < 255)
+		{
+			text.textAlpha += TIMESTEP * 500;
+			if (text.textAlpha >= 255)
+				text.textAlpha = 255;
+
+			text.title.setFillColor(sf::Color(255, 255, 255, text.textAlpha));
+			text.start.setFillColor(sf::Color(255, 255, 255, text.textAlpha));
+		}
 		if (isKeyReleased(sf::Keyboard::Key::Enter))
 		{
+			text.textAlpha = 0;
+			text.title.setFillColor(sf::Color(255, 255, 255, text.textAlpha));
+			text.start.setFillColor(sf::Color(255, 255, 255, text.textAlpha));
+
 			generateBackground();
+			screenTransition.start(ScreenTransition::Mode::OPENING, { window.getSize().x / 2.f, window.getSize().y / 2.f });
 			gameState = GameState::PLAYING;
 			gameClock.start();
 			logicClock.start();
@@ -135,8 +151,23 @@ void Game::update()
 	//  Game over state
 	else if (gameState == GameState::GAME_OVER)
 	{
+		if (text.textAlpha < 255)
+		{
+			text.textAlpha += TIMESTEP * 500;
+			if (text.textAlpha >= 255)
+				text.textAlpha = 255;
+
+			text.gameOver.setFillColor(sf::Color(255, 255, 255, text.textAlpha));
+			text.score.setFillColor(sf::Color(255, 255, 255, text.textAlpha));
+			text.restart.setFillColor(sf::Color(255, 255, 255, text.textAlpha));
+		}
 		if (isKeyReleased(sf::Keyboard::Key::Enter))
 		{
+			text.textAlpha = 0;
+			text.gameOver.setFillColor(sf::Color(255, 255, 255, text.textAlpha));
+			text.score.setFillColor(sf::Color(255, 255, 255, text.textAlpha));
+			text.restart.setFillColor(sf::Color(255, 255, 255, text.textAlpha));
+
 			gameState = GameState::TITLE;
 			gameClock.reset();
 			logicClock.reset();
@@ -155,65 +186,79 @@ void Game::update()
 		// Fixed timestep update
 		while (accumulator >= TIMESTEP)
 		{
-			processSpawns();
+			if (!screenTransition.getIsFinished())
+				screenTransition.update(TIMESTEP);
 
-			// Update powerups
-			for (auto it = powerups.begin(); it != powerups.end(); ++it)
+			if (!isScreenTransitionClosing)
 			{
-				// Update powerups and check for pickup by player
-				powerups.at(it - powerups.begin())->update(TIMESTEP);
-				processCollisionsWithPlayer(*it);
+				processSpawns();
 
-
-				// Remove expired powerups
-				if ((*it)->getNeedsDeleting())
+				// Update powerups
+				for (auto it = powerups.begin(); it != powerups.end(); ++it)
 				{
-					it = powerups.erase(it);
-					if (it == powerups.end())
-						break;
+					// Update powerups and check for pickup by player
+					powerups.at(it - powerups.begin())->update(TIMESTEP);
+					processCollisionsWithPlayer(*it);
+
+
+					// Remove expired powerups
+					if ((*it)->getNeedsDeleting())
+					{
+						it = powerups.erase(it);
+						if (it == powerups.end())
+							break;
+					}
 				}
+
+				// Update enemies
+				for (auto& enemy : enemies) {
+					// Update enemy and add score if it is killed
+					player.score += enemy.update(TIMESTEP, window, player.getPosition());
+					processCollisionsWithPlayer(enemy);
+
+					if (enemy.getNeedsDeleting())
+						effectManager.addEffect(std::make_shared<EnemyFragmentsEffect>(enemy.getPosition(), enemy.getColor()));
+				}
+				// Remove dead enemies
+				unsigned enemyCount = enemies.size();
+				enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const Enemy& e) { return e.getNeedsDeleting(); }), enemies.end());
+				if (enemies.size() < enemyCount)
+					soundManager.playSound(SoundManager::SoundID::ENEMY_DEATH, 2.25f, 0.1f);
+
+				// Update player
+				player.update(TIMESTEP, window, enemies);
+				if (player.wasBulletJustFired())
+					soundManager.playSound(SoundManager::SoundID::PLAYER_SHOOT, 1.f, 0.15f);
+				if (player.hasBulletJustHit())
+					soundManager.playSound(SoundManager::SoundID::ENEMY_HIT, 0.5f, 0.1f);
+				if (player.getHasPowerUpJustExpired())
+					soundManager.playSound(SoundManager::SoundID::POWERUP_EXPIRE, 2.f);
+
+				hud.update(window, player.getLivesCurrent(), player.getLivesMax(), player.score, player.getActivePowerUp());
+
+				// Update effects
+				effectManager.update(TIMESTEP, player.getPosition());
 			}
-
-			// Update enemies
-			for (auto& enemy : enemies) {
-				// Update enemy and add score if it is killed
-				player.score += enemy.update(TIMESTEP, window, player.getPosition());
-				processCollisionsWithPlayer(enemy);
-
-				if (enemy.getNeedsDeleting())
-					effectManager.addEffect(std::make_shared<EnemyFragmentsEffect>(enemy.getPosition(), enemy.getColor()));
-			}
-			// Remove dead enemies
-			unsigned enemyCount = enemies.size();
-			enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const Enemy& e) { return e.getNeedsDeleting(); }), enemies.end());
-			if (enemies.size() < enemyCount)
-				soundManager.playSound(SoundManager::SoundID::ENEMY_DEATH, 2.25f, 0.1f);
-
-			// Update player
-			player.update(TIMESTEP, window, enemies);
-			if (player.wasBulletJustFired())
-				soundManager.playSound(SoundManager::SoundID::PLAYER_SHOOT, 1.f, 0.15f);
-			if (player.hasBulletJustHit())
-				soundManager.playSound(SoundManager::SoundID::ENEMY_HIT, 0.5f, 0.1f);
-			if (player.getHasPowerUpJustExpired())
-				soundManager.playSound(SoundManager::SoundID::POWERUP_EXPIRE, 2.f);
-
-			hud.update(window, player.getLivesCurrent(), player.getLivesMax(), player.score, player.getActivePowerUp());
-
-			// Update effects
-			effectManager.update(TIMESTEP, player.getPosition());
 
 			// On player death
 			if (player.getLivesCurrent() <= 0)
 			{
-				gameState = GameState::GAME_OVER;
-				soundManager.playSound(SoundManager::SoundID::GAME_OVER);
+				if (!isScreenTransitionClosing)
+				{
+					screenTransition.start(ScreenTransition::Mode::CLOSING, player.getPosition());
+					isScreenTransitionClosing = true;
+				}
+				else if (!screenTransition.getIsActive() && screenTransition.getIsFinished())
+				{
+					gameState = GameState::GAME_OVER;
+					soundManager.playSound(SoundManager::SoundID::GAME_OVER);
 
-				text.score.setString("Score: " + std::to_string(player.score));
-				text.score.setOrigin({ text.score.getGlobalBounds().size.x / 2.f, text.score.getGlobalBounds().size.y / 2.f });
-				text.score.setPosition({ window.getSize().x / 2.f, window.getSize().y / 2.f - 20.f });
+					text.score.setString("Score: " + std::to_string(player.score));
+					text.score.setOrigin({ text.score.getGlobalBounds().size.x / 2.f, text.score.getGlobalBounds().size.y / 2.f });
+					text.score.setPosition({ window.getSize().x / 2.f, window.getSize().y / 2.f - 20.f });
 
-				break;
+					isScreenTransitionClosing = false;
+				}
 			}
 
 			accumulator -= TIMESTEP;
@@ -229,7 +274,7 @@ void Game::update()
 
 void Game::render()
 {
-	window.clear();
+	window.clear(sf::Color(10, 10, 10));
 
 	// Title screen state
 	if (gameState == GameState::TITLE)
@@ -260,6 +305,9 @@ void Game::render()
 			powerup->render(alpha, window, isDebugModeOn);
 
 		hud.render(window);
+
+		if (!screenTransition.getIsFinished())
+			screenTransition.render(alpha, window);
 	}
 
 	window.display();

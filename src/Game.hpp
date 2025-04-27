@@ -8,6 +8,7 @@
 #include "PowerUp.hpp"
 #include "SoundManager.hpp"
 #include "EffectManager.hpp"
+#include "ScreenTransition.hpp"
 
 class Game
 {
@@ -57,11 +58,15 @@ private:
 		sf::Text gameOver;
 		sf::Text score;
 		sf::Text restart;
+		unsigned textAlpha;
 	};
 	Text text;
 
 	std::vector<sf::RectangleShape> backgroundStars;
 	const unsigned BACKGROUND_STARS_COUNT = 50U;
+
+	ScreenTransition screenTransition;
+	bool isScreenTransitionClosing;
 
 	Player player;
 
