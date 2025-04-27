@@ -1,7 +1,7 @@
-# SFML01 - Top-Down Shooter Game
+# Project 1 - Top-Down Shooter Game
 
 ## Overview
-SFML01 is a top-down shooter game created with C++ and SFML 3.0. The game features smooth player movement, shooting mechanics, enemy spawning, powerups, and progressive difficulty. The goal is to survive and shoot enemies while avoiding obstacles.
+A top-down shooter game created with C++ and SFML 3.0. The game features smooth player movement, shooting mechanics, enemy spawning, powerups, and progressive difficulty. The goal is to survive and shoot enemies while avoiding obstacles.
 
 ## Features
 - Smooth player movement with acceleration, velocity, and friction
