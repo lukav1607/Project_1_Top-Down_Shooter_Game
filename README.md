@@ -20,7 +20,7 @@ A top-down shooter game created with C++ and SFML 3.0. The game features smooth 
 ## How to Run
 1. Clone the repository:
     ```bash
-    git clone https://github.com/lukav1607/SFML01.git
+    git clone https://github.com/lukav1607/Project_1_Top-Down_Shooter_Game.git
     ```
 2. Open the project in Visual Studio.
 3. Build and run the project to play the game!
