@@ -1,39 +1,38 @@
-# Project 1 - Top-Down Shooter Game
+# Space Shooter Game
 
-## Overview
-A top-down shooter game created with C++ and SFML 3.0. The game features smooth player movement, shooting mechanics, enemy spawning, powerups, and progressive difficulty. The goal is to survive and shoot enemies while avoiding obstacles.
+A simple Space Shooter game built in the course of one week with C++ and SFML.
+The goal is to destroy incoming enemies which get stronger with each enemy spawned and survive for as long as possible.
 
-## Features
-- Smooth player movement with acceleration, velocity, and friction
-- Rotation towards the mouse cursor
-- Powerups (e.g., fire rate increase, damage increase, health-up)
-- Progressive enemy difficulty (size and speed variations)
-- Particle effects and animations
-- Screen transitions and game states
-- Sound effects and UI elements (health, score, powerups)
+## 🎮 Gameplay Overview
+- Destroy enemies to increase your score
+- Enemies get stronger and contribute more to the score with time
+- Pick up powerups that spawn for a short timed power boost
+- Try to get the highest score and survive as long as you can!
 
-## Requirements
-- **C++** (C++17 or newer)
-- **SFML 3.0**
-- **Visual Studio** (or compatible IDE)
+## 🚀 Features
+- Smooth player movement and rotation
+- Basic radius-based collisions
+- Timed powerup system
+- Simple difficulty scaling
+- Minimalistic HUD showing lives and score
 
-## How to Run
+## 🛠️ Made With
+C++
+
+[SFML 3.0.0](https://www.sfml-dev.org/)
+
+## 📦 Build and Run
+To run the project locally:
 1. Clone the repository:
-    ```bash
-    git clone https://github.com/lukav1607/Project_1_Top-Down_Shooter_Game.git
-    ```
-2. Open the project in Visual Studio.
-3. Build and run the project to play the game!
+```
+bash
+Copy
+Edit
+git clone https://github.com/lukav1607/Space-Shooter.git
+```
+2. Open the project with Visual Studio (or your preferred IDE).
+3. Make sure you have SFML 3.0.0 installed and linked properly.
+4. Build and run the project!
 
-## How to Build (Windows)
-1. Install SFML 3.0 (statically linked version recommended).
-2. Set up your build environment (Visual Studio recommended).
-3. Link the necessary SFML libraries (`sfml-graphics`, `sfml-window`, `sfml-system`, `sfml-audio`).
-4. Build and run the project.
-
-## Credits
-- **SFML** - Simple and Fast Multimedia Library (https://www.sfml-dev.org/)
-- **[Luka Vukorepa]** - Developer (Me!)
-
-## License
-MIT License
+## 📜 License
+This project is for educational and portfolio purposes.
